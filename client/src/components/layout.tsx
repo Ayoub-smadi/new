@@ -26,6 +26,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const navLinks = [
     { href: "/", label: "الرئيسية" },
     { href: "/products", label: "المتجر" },
+    { href: "/nursery", label: "المشتل" },
     { href: "/about", label: "من نحن" },
     { href: "/contact", label: "اتصل بنا" },
   ];

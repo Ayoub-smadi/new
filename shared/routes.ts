@@ -2,12 +2,14 @@ import { z } from 'zod';
 import { 
   insertCategorySchema, 
   insertProductSchema, 
+  insertNurseryGallerySchema,
   OrderStatusEnum,
   PaymentMethodEnum,
   categories,
   products,
   orders,
   reviews,
+  nurseryGallery,
   users
 } from './schema';
 
@@ -183,6 +185,32 @@ export const api = {
           totalRevenue: z.number(),
           lowStockProducts: z.number()
         }),
+        401: errorSchemas.unauthorized
+      }
+    }
+  },
+  nursery: {
+    list: {
+      method: 'GET' as const,
+      path: '/api/nursery' as const,
+      responses: {
+        200: z.array(z.custom<typeof nurseryGallery.$inferSelect>()),
+      }
+    },
+    create: {
+      method: 'POST' as const,
+      path: '/api/nursery' as const,
+      input: insertNurseryGallerySchema,
+      responses: {
+        201: z.custom<typeof nurseryGallery.$inferSelect>(),
+        401: errorSchemas.unauthorized
+      }
+    },
+    delete: {
+      method: 'DELETE' as const,
+      path: '/api/nursery/:id' as const,
+      responses: {
+        204: z.void(),
         401: errorSchemas.unauthorized
       }
     }

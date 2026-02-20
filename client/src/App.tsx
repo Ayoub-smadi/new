@@ -15,6 +15,7 @@ import ProductDetailPage from "@/pages/products/[id]";
 import CartPage from "@/pages/cart";
 import CheckoutPage from "@/pages/checkout";
 import DashboardPage from "@/pages/dashboard";
+import NurseryPage from "@/pages/nursery";
 
 function Router() {
   const { isLoading } = useAuth();
@@ -36,6 +37,7 @@ function Router() {
         <Route path="/cart" component={CartPage} />
         <Route path="/checkout" component={CheckoutPage} />
         <Route path="/dashboard" component={DashboardPage} />
+        <Route path="/nursery" component={NurseryPage} />
         {/* Placeholder for About/Contact to prevent 404 on nav clicks */}
         <Route path="/about">
           <div className="container py-16 text-center">
