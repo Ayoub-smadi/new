@@ -35,10 +35,10 @@ export default function Home() {
               موسم الزراعة الجديد
             </Badge>
             <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight drop-shadow-lg">
-              ازرع مستقبلك مع <span className="text-accent">مروج</span>
+              ازرع مستقبلك مع <span className="text-accent">مشاتل القادري ومروج الخضراء</span>
             </h1>
             <p className="text-lg md:text-xl text-white/90 leading-relaxed drop-shadow-md max-w-2xl mx-auto">
-              نوفر لك أفضل البذور والأسمدة والمعدات الزراعية لتضمن محصولاً وفيراً وجودة عالية.
+              نوفر لك في مشاتل القادري ومروج الخضراء أفضل البذور والأسمدة والمعدات الزراعية لتضمن محصولاً وفيراً وجودة عالية.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
               <Link href="/products">

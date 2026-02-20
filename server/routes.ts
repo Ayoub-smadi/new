@@ -174,8 +174,8 @@ export async function registerRoutes(
 export async function seedDatabase() {
   const cats = await storage.getCategories();
   if (cats.length === 0) {
-    const c1 = await storage.createCategory({ name: "نباتات زينة", description: "نباتات للزينة الداخلية والخارجية", imageUrl: "https://images.unsplash.com/photo-1416879598555-22442b083d03" });
-    const c2 = await storage.createCategory({ name: "أشجار مثمرة", description: "أشجار تعطي ثماراً لزراعة الحدائق", imageUrl: "https://images.unsplash.com/photo-1598514982205-f36b96d1e8d4" });
+    const c1 = await storage.createCategory({ name: "مشاتل القادري", description: "نباتات للزينة الداخلية والخارجية", imageUrl: "https://images.unsplash.com/photo-1416879598555-22442b083d03" });
+    const c2 = await storage.createCategory({ name: "مروج الخضراء", description: "أشجار تعطي ثماراً لزراعة الحدائق", imageUrl: "https://images.unsplash.com/photo-1598514982205-f36b96d1e8d4" });
     const c3 = await storage.createCategory({ name: "أدوات زراعية", description: "معدات وأدوات للزراعة", imageUrl: "https://images.unsplash.com/photo-1416879598555-22442b083d03" });
     
     await storage.createProduct({
