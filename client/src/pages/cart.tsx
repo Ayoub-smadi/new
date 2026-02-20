@@ -28,7 +28,7 @@ export default function CartPage() {
         </div>
         <h1 className="text-3xl font-bold mb-2">سلة المشتريات فارغة</h1>
         <p className="text-muted-foreground mb-8 max-w-md">
-          لم تقم بإضافة أي منتجات للسلة بعد. تصفح المتجر واكتشف أفضل المنتجات الزراعية من مشاتل القادري ومروج الخضراء.
+          لم تقم بإضافة أي منتجات للسلة بعد. تصفح المتجر واكتشف أفضل المنتجات الزراعية من مشاتل القادري.
         </p>
         <Link href="/products">
           <Button size="lg" className="px-8">تسوق الآن</Button>

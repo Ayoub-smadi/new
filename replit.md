@@ -1,10 +1,11 @@
 # Overview
 
-This is an Arabic-language (RTL) e-commerce web application for selling agricultural supplies — including ornamental plants, fruit trees, seeds, fertilizers, farming tools, and irrigation systems. The store is branded as "مشاتل القادري ومروج الخضراء" (Al-Qadri Nurseries & Green Meadows). It features a product catalog with categories, shopping cart, checkout flow, order management, product reviews, a nursery gallery, and an admin dashboard.
+This is an Arabic-language (RTL) e-commerce web application for selling agricultural supplies — including ornamental plants, fruit trees, seeds, fertilizers, farming tools, and irrigation systems. The store is branded as "مشاتل القادري" (Al-Qadri Nurseries). It features a product catalog with categories, shopping cart, checkout flow, order management, product reviews, a nursery gallery, and an admin dashboard.
 
 # User Preferences
 
 Preferred communication style: Simple, everyday language.
+Admin Credentials: Username: Ayoub, Password: Ayoub@123
 
 # System Architecture
 
@@ -41,7 +42,7 @@ The project follows a monorepo pattern with three top-level code directories:
 - **Framework:** Express.js on Node.js with TypeScript (run via `tsx`)
 - **API Design:** RESTful JSON API under `/api/*` prefix, route definitions shared between client and server via `shared/routes.ts`
 - **Authentication:** Replit Auth (OpenID Connect via `openid-client` + Passport.js), session-based with `express-session` stored in PostgreSQL via `connect-pg-simple`
-- **Authorization:** Simple admin check based on email containing "admin" — this is an MVP approach
+- **Authorization:** Admin check for email "Ayoub"
 - **Key API Endpoints:**
   - `GET/POST /api/categories` — list and create categories
   - `GET/POST /api/products` — list (with filters) and create products

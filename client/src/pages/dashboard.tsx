@@ -43,7 +43,7 @@ export default function DashboardPage() {
   const { user } = useAuth();
   const { toast } = useToast();
   const { data: orders, isLoading: ordersLoading } = useOrders();
-  const isAdmin = user?.email?.includes("admin");
+  const isAdmin = user?.firstName === "Ayoub";
   const [isProductDialogOpen, setIsProductDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
@@ -133,16 +133,12 @@ export default function DashboardPage() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div className="flex items-center gap-4">
           <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-primary">
-            {user?.profileImageUrl ? (
-              <img src={user.profileImageUrl} alt="Profile" className="w-full h-full object-cover" />
-            ) : (
-              <div className="w-full h-full bg-muted flex items-center justify-center text-2xl font-bold text-muted-foreground">
-                {user?.firstName?.[0]}
-              </div>
-            )}
+            <div className="w-full h-full bg-muted flex items-center justify-center text-2xl font-bold text-muted-foreground">
+              A
+            </div>
           </div>
           <div>
-            <h1 className="text-2xl font-bold">أهلاً، {user?.firstName} {user?.lastName}</h1>
+            <h1 className="text-2xl font-bold">أهلاً، Ayoub</h1>
             <p className="text-muted-foreground">لوحة التحكم الخاصة بك</p>
           </div>
         </div>

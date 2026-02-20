@@ -21,7 +21,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
   const [isOpen, setIsOpen] = useState(false);
 
-  const isAdmin = user?.email?.includes("admin") || false; // Simple check for MVP
+  const isAdmin = user?.firstName === "Ayoub" || false;
 
   const navLinks = [
     { href: "/", label: "الرئيسية" },
@@ -46,7 +46,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 <div className="flex flex-col gap-6 mt-6">
                   <div className="flex items-center gap-2 font-bold text-xl text-primary">
                     <Leaf className="h-6 w-6" />
-                    <span>مشاتل القادري ومروج الخضراء</span>
+                    <span>مشاتل القادري</span>
                   </div>
                   <nav className="flex flex-col gap-4">
                     {navLinks.map((link) => (
@@ -69,7 +69,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
             <Link href="/">
               <div className="flex items-center gap-2 font-bold text-2xl text-primary cursor-pointer mr-4">
                 <Leaf className="h-8 w-8" />
-                <span className="hidden sm:inline-block">مشاتل القادري ومروج الخضراء</span>
+                <span className="hidden sm:inline-block">مشاتل القادري</span>
               </div>
             </Link>
 
@@ -114,7 +114,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
-                  <DropdownMenuLabel className="text-right">مرحباً، {user.firstName || "مستخدم"}</DropdownMenuLabel>
+                  <DropdownMenuLabel className="text-right">مرحباً، Ayoub</DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <Link href="/dashboard">
                     <DropdownMenuItem className="cursor-pointer justify-end">
@@ -156,10 +156,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
             <div className="space-y-4">
               <div className="flex items-center gap-2 font-bold text-xl text-primary">
                 <Leaf className="h-6 w-6" />
-                <span>مشاتل القادري ومروج الخضراء</span>
+                <span>مشاتل القادري</span>
               </div>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                وجهتك الأولى للمنتجات الزراعية عالية الجودة من مشاتل القادري ومروج الخضراء. نوفر البذور، الأسمدة، والمعدات لمساعدة مزرعتك على الازدهار.
+                وجهتك الأولى للمنتجات الزراعية عالية الجودة من مشاتل القادري. نوفر البذور، الأسمدة، والمعدات لمساعدة مزرعتك على الازدهار.
               </p>
             </div>
             <div>
@@ -192,7 +192,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
             </div>
           </div>
           <div className="mt-12 pt-8 border-t text-center text-sm text-muted-foreground">
-            © {new Date().getFullYear()} مشاتل القادري ومروج الخضراء. جميع الحقوق محفوظة.
+            © {new Date().getFullYear()} مشاتل القادري. جميع الحقوق محفوظة.
           </div>
         </div>
       </footer>

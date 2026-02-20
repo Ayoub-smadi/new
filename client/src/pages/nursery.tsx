@@ -12,7 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 export default function NurseryPage() {
   const { user } = useAuth();
   const { toast } = useToast();
-  const isAdmin = user?.email?.includes("admin");
+  const isAdmin = user?.firstName === "Ayoub";
   const [activeTab, setActiveTab] = useState("all");
 
   const { data: items, isLoading } = useQuery<NurseryGallery[]>({
