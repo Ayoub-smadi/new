@@ -165,6 +165,32 @@ export async function registerRoutes(
     res.json(stats);
   });
 
+  // NURSERY GALLERY
+  app.get("/api/nursery", async (req, res) => {
+    const items = await storage.getNurseryGallery();
+    res.json(items);
+  });
+
+  app.post("/api/nursery", isAuthenticated, async (req, res) => {
+    try {
+      const item = await storage.createNurseryItem(req.body);
+      res.status(201).json(item);
+    } catch (err) {
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.delete("/api/nursery/:id", isAuthenticated, async (req, res) => {
+    await storage.deleteNurseryItem(req.params.id);
+    res.status(204).end();
+  });
+
+  // CATEGORY DELETE
+  app.delete("/api/categories/:id", isAuthenticated, async (req, res) => {
+    await storage.deleteCategory(req.params.id);
+    res.status(204).end();
+  });
+
   // Call seed database
   seedDatabase().catch(console.error);
 
@@ -173,9 +199,10 @@ export async function registerRoutes(
 
 export async function seedDatabase() {
   const cats = await storage.getCategories();
+  // Check if "مروج الخضراء" exists and delete it if requested (though we handle it via API usually)
+  // For the prompt "احذف هاي ومروج الخضراء", I'll also ensure it's not in the seed if it's a fresh start
   if (cats.length === 0) {
     const c1 = await storage.createCategory({ name: "مشاتل القادري", description: "نباتات للزينة الداخلية والخارجية", imageUrl: "https://images.unsplash.com/photo-1416879598555-22442b083d03" });
-    const c2 = await storage.createCategory({ name: "مروج الخضراء", description: "أشجار تعطي ثماراً لزراعة الحدائق", imageUrl: "https://images.unsplash.com/photo-1598514982205-f36b96d1e8d4" });
     const c3 = await storage.createCategory({ name: "أدوات زراعية", description: "معدات وأدوات للزراعة", imageUrl: "https://images.unsplash.com/photo-1416879598555-22442b083d03" });
     
     await storage.createProduct({
@@ -187,16 +214,6 @@ export async function seedDatabase() {
       stock: 50,
       imageUrl: "https://images.unsplash.com/photo-1614594975525-e45190c55d0b",
       isFeatured: true
-    });
-    
-    await storage.createProduct({
-      categoryId: c2.id,
-      name: "شجرة ليمون",
-      description: "شجرة ليمون مثمرة، ارتفاع 1.5 متر، جاهزة للزراعة.",
-      price: "85.00",
-      stock: 15,
-      imageUrl: "https://images.unsplash.com/photo-1550828520-4cb496926fc9",
-      isFeatured: false
     });
     
     await storage.createProduct({

@@ -6,13 +6,15 @@ import {
   orders, type Order, type InsertOrder,
   orderItems, type OrderItem, type InsertOrderItem,
   reviews, type Review, type InsertReview,
-  users
+  users,
+  nurseryGallery, type NurseryGallery, type InsertNurseryGallery
 } from "@shared/schema";
 
 export interface IStorage {
   // Categories
   getCategories(): Promise<Category[]>;
   createCategory(category: InsertCategory): Promise<Category>;
+  deleteCategory(id: string): Promise<void>;
   
   // Products
   getProducts(categoryId?: string, search?: string, featured?: boolean): Promise<(Product & { category: Category })[]>;
@@ -30,6 +32,11 @@ export interface IStorage {
   // Reviews
   getProductReviews(productId: string): Promise<(Review & { user: typeof users.$inferSelect })[]>;
   createReview(review: InsertReview): Promise<Review>;
+
+  // Nursery Gallery
+  getNurseryGallery(): Promise<NurseryGallery[]>;
+  createNurseryItem(item: InsertNurseryGallery): Promise<NurseryGallery>;
+  deleteNurseryItem(id: string): Promise<void>;
   
   // Admin Stats
   getAdminStats(): Promise<{ totalProducts: number, totalUsers: number, totalOrders: number, totalRevenue: number, lowStockProducts: number }>;
@@ -43,6 +50,12 @@ export class DatabaseStorage implements IStorage {
   async createCategory(category: InsertCategory) {
     const [cat] = await db.insert(categories).values(category).returning();
     return cat;
+  }
+
+  async deleteCategory(id: string) {
+    // Delete products first
+    await db.delete(products).where(eq(products.categoryId, id));
+    await db.delete(categories).where(eq(categories.id, id));
   }
 
   async getProducts(categoryId?: string, search?: string, featured?: boolean) {
@@ -192,6 +205,19 @@ export class DatabaseStorage implements IStorage {
     }).where(eq(products.id, review.productId));
 
     return r;
+  }
+
+  async getNurseryGallery() {
+    return await db.select().from(nurseryGallery);
+  }
+
+  async createNurseryItem(item: InsertNurseryGallery) {
+    const [res] = await db.insert(nurseryGallery).values(item).returning();
+    return res;
+  }
+
+  async deleteNurseryItem(id: string) {
+    await db.delete(nurseryGallery).where(eq(nurseryGallery.id, id));
   }
 
   async getAdminStats() {

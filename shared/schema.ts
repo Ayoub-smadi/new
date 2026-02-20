@@ -57,6 +57,15 @@ export const reviews = pgTable("reviews", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const nurseryGallery = pgTable("nursery_gallery", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  title: text("title").notNull(),
+  description: text("description"),
+  imageUrl: text("image_url").notNull(),
+  type: text("type").notNull(), // 'plant' or 'branch'
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Relations
 export const productsRelations = relations(products, ({ one, many }) => ({
   category: one(categories, {
@@ -68,6 +77,9 @@ export const productsRelations = relations(products, ({ one, many }) => ({
 
 export const categoriesRelations = relations(categories, ({ many }) => ({
   products: many(products),
+}));
+
+export const nurseryGalleryRelations = relations(nurseryGallery, ({ many }) => ({
 }));
 
 export const ordersRelations = relations(orders, ({ one, many }) => ({
@@ -106,6 +118,7 @@ export const insertProductSchema = createInsertSchema(products).omit({ id: true,
 export const insertOrderSchema = createInsertSchema(orders).omit({ id: true, createdAt: true });
 export const insertOrderItemSchema = createInsertSchema(orderItems).omit({ id: true });
 export const insertReviewSchema = createInsertSchema(reviews).omit({ id: true, createdAt: true });
+export const insertNurseryGallerySchema = createInsertSchema(nurseryGallery).omit({ id: true, createdAt: true });
 
 // Types
 export type Category = typeof categories.$inferSelect;
@@ -118,6 +131,8 @@ export type OrderItem = typeof orderItems.$inferSelect;
 export type InsertOrderItem = z.infer<typeof insertOrderItemSchema>;
 export type Review = typeof reviews.$inferSelect;
 export type InsertReview = z.infer<typeof insertReviewSchema>;
+export type NurseryGallery = typeof nurseryGallery.$inferSelect;
+export type InsertNurseryGallery = z.infer<typeof insertNurseryGallerySchema>;
 
 // Request Types
 export type CreateOrderRequest = {
