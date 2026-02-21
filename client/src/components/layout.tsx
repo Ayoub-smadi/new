@@ -16,12 +16,12 @@ import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 
 export function Layout({ children }: { children: React.ReactNode }) {
-  const { user, logout } = useAuth();
+  const { user, isAdmin, logout } = useAuth();
   const { count } = useCart();
   const [location] = useLocation();
   const [isOpen, setIsOpen] = useState(false);
 
-  const isAdmin = user?.firstName === "Ayoub" || false;
+  // const isAdmin = user?.firstName === "Ayoub" || false;
 
   const navLinks = [
     { href: "/", label: "الرئيسية" },

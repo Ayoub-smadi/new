@@ -4,6 +4,7 @@ import { storage } from "./storage";
 import { api } from "@shared/routes";
 import { z } from "zod";
 import { setupAuth, registerAuthRoutes, isAuthenticated } from "./replit_integrations/auth";
+import type { RequestHandler } from "express";
 
 export async function registerRoutes(
   httpServer: Server,
@@ -13,13 +14,23 @@ export async function registerRoutes(
   await setupAuth(app);
   registerAuthRoutes(app);
 
+  // ADMIN CHECK MIDDLEWARE
+  const isAdminMiddleware: RequestHandler = async (req: any, res, next) => {
+    if (!req.isAuthenticated()) return res.status(401).json({ message: "Unauthorized" });
+    const user = await storage.getUser(req.user.claims.sub);
+    if (user?.role !== 'admin' && user?.firstName !== 'Ayoub') {
+      return res.status(403).json({ message: "Forbidden: Admin access required" });
+    }
+    next();
+  };
+
   // CATEGORIES
   app.get(api.categories.list.path, async (req, res) => {
     const cats = await storage.getCategories();
     res.json(cats);
   });
 
-  app.post(api.categories.create.path, isAuthenticated, async (req, res) => {
+  app.post(api.categories.create.path, isAuthenticated, isAdminMiddleware, async (req, res) => {
     try {
       const input = api.categories.create.input.parse(req.body);
       const cat = await storage.createCategory(input);
@@ -50,7 +61,7 @@ export async function registerRoutes(
     res.json(prod);
   });
 
-  app.post(api.products.create.path, isAuthenticated, async (req, res) => {
+  app.post(api.products.create.path, isAuthenticated, isAdminMiddleware, async (req, res) => {
     try {
       const input = api.products.create.input.parse(req.body);
       const prod = await storage.createProduct(input);
@@ -63,10 +74,10 @@ export async function registerRoutes(
     }
   });
 
-  app.put(api.products.update.path, isAuthenticated, async (req, res) => {
+  app.put(api.products.update.path, isAuthenticated, isAdminMiddleware, async (req, res) => {
     try {
       const input = api.products.update.input.parse(req.body);
-      const prod = await storage.updateProduct(req.params.id, input);
+      const prod = await storage.updateProduct(req.params.id as string, input);
       if (!prod) return res.status(404).json({ message: "Product not found" });
       res.json(prod);
     } catch (err) {
@@ -77,8 +88,8 @@ export async function registerRoutes(
     }
   });
 
-  app.delete(api.products.delete.path, isAuthenticated, async (req, res) => {
-    await storage.deleteProduct(req.params.id);
+  app.delete(api.products.delete.path, isAuthenticated, isAdminMiddleware, async (req, res) => {
+    await storage.deleteProduct(req.params.id as string);
     res.status(204).end();
   });
 
@@ -87,10 +98,12 @@ export async function registerRoutes(
     // Return all orders for the user
     // A real app might distinguish admins vs normal users here
     const userId = req.user.claims.sub;
+    const user = await storage.getUser(userId);
+    const isAdmin = user?.role === 'admin' || user?.firstName === 'Ayoub';
     
     // For MVP, if there's a specific flag we could return all, but let's just return for userId unless they pass a param
     const { all } = req.query;
-    const orders = await storage.getOrders(all === 'true' ? undefined : userId);
+    const orders = await storage.getOrders((all === 'true' && isAdmin) ? undefined : userId);
     res.json(orders);
   });
 
@@ -121,10 +134,10 @@ export async function registerRoutes(
     }
   });
 
-  app.patch(api.orders.updateStatus.path, isAuthenticated, async (req, res) => {
+  app.patch(api.orders.updateStatus.path, isAuthenticated, isAdminMiddleware, async (req, res) => {
     try {
       const input = api.orders.updateStatus.input.parse(req.body);
-      const order = await storage.updateOrderStatus(req.params.id, input.status);
+      const order = await storage.updateOrderStatus(req.params.id as string, input.status);
       if (!order) return res.status(404).json({ message: "Order not found" });
       res.json(order);
     } catch (err) {
@@ -137,7 +150,7 @@ export async function registerRoutes(
 
   // REVIEWS
   app.get(api.reviews.listByProduct.path, async (req, res) => {
-    const reviews = await storage.getProductReviews(req.params.id);
+    const reviews = await storage.getProductReviews(req.params.id as string);
     res.json(reviews);
   });
 
@@ -148,7 +161,7 @@ export async function registerRoutes(
       const review = await storage.createReview({
         ...input,
         userId,
-        productId: req.params.id
+        productId: req.params.id as string
       });
       res.status(201).json(review);
     } catch (err) {
@@ -160,7 +173,7 @@ export async function registerRoutes(
   });
 
   // ADMIN STATS
-  app.get(api.admin.stats.path, isAuthenticated, async (req, res) => {
+  app.get(api.admin.stats.path, isAuthenticated, isAdminMiddleware, async (req, res) => {
     const stats = await storage.getAdminStats();
     res.json(stats);
   });
@@ -171,7 +184,7 @@ export async function registerRoutes(
     res.json(items);
   });
 
-  app.post("/api/nursery", isAuthenticated, async (req, res) => {
+  app.post("/api/nursery", isAuthenticated, isAdminMiddleware, async (req, res) => {
     try {
       const item = await storage.createNurseryItem(req.body);
       res.status(201).json(item);
@@ -180,14 +193,14 @@ export async function registerRoutes(
     }
   });
 
-  app.delete("/api/nursery/:id", isAuthenticated, async (req, res) => {
-    await storage.deleteNurseryItem(req.params.id);
+  app.delete("/api/nursery/:id", isAuthenticated, isAdminMiddleware, async (req, res) => {
+    await storage.deleteNurseryItem(req.params.id as string);
     res.status(204).end();
   });
 
   // CATEGORY DELETE
-  app.delete("/api/categories/:id", isAuthenticated, async (req, res) => {
-    await storage.deleteCategory(req.params.id);
+  app.delete("/api/categories/:id", isAuthenticated, isAdminMiddleware, async (req, res) => {
+    await storage.deleteCategory(req.params.id as string);
     res.status(204).end();
   });
 

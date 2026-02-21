@@ -40,10 +40,9 @@ import { insertProductSchema } from "@shared/schema";
 import { useState } from "react";
 
 export default function DashboardPage() {
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const { toast } = useToast();
   const { data: orders, isLoading: ordersLoading } = useOrders();
-  const isAdmin = user?.firstName === "Ayoub";
   const [isProductDialogOpen, setIsProductDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 

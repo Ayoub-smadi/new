@@ -134,6 +134,9 @@ export type InsertReview = z.infer<typeof insertReviewSchema>;
 export type NurseryGallery = typeof nurseryGallery.$inferSelect;
 export type InsertNurseryGallery = z.infer<typeof insertNurseryGallerySchema>;
 
+export type User = typeof users.$inferSelect;
+export type UpsertUser = typeof users.$inferInsert;
+
 // Request Types
 export type CreateOrderRequest = {
   shippingAddress: string;

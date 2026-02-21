@@ -10,9 +10,8 @@ import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 
 export default function NurseryPage() {
-  const { user } = useAuth();
+  const { isAdmin } = useAuth();
   const { toast } = useToast();
-  const isAdmin = user?.firstName === "Ayoub";
   const [activeTab, setActiveTab] = useState("all");
 
   const { data: items, isLoading } = useQuery<NurseryGallery[]>({
