@@ -123,12 +123,15 @@ export async function registerRoutes(
 
   app.post(api.products.create.path, isAuthenticated, isAdminMiddleware, async (req, res) => {
     try {
+      console.log("Creating product with body:", JSON.stringify(req.body, null, 2));
       const input = api.products.create.input.parse(req.body);
       const prod = await storage.createProduct(input);
+      console.log("Product created successfully:", prod.id);
       res.status(201).json(prod);
     } catch (err: any) {
       console.error("Error creating product:", err);
       if (err instanceof z.ZodError) {
+        console.error("Validation error details:", JSON.stringify(err.errors, null, 2));
         return res.status(400).json({ message: err.errors[0].message, field: err.errors[0].path.join('.') });
       }
       res.status(500).json({ message: err.message || "Internal server error" });

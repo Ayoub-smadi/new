@@ -147,7 +147,7 @@ export default function DashboardPage() {
       name: "",
       description: "",
       price: "0",
-      discountPrice: null,
+      discountPrice: "",
       categoryId: "",
       subCategoryId: "",
       imageUrl: "",
@@ -158,10 +158,16 @@ export default function DashboardPage() {
 
   const productMutation = useMutation({
     mutationFn: async (data: any) => {
+      const formattedData = {
+        ...data,
+        price: data.price.toString(),
+        discountPrice: data.discountPrice ? data.discountPrice.toString() : null,
+        stock: parseInt(data.stock.toString()) || 0,
+      };
       if (editingProduct) {
-        return await apiRequest("PUT", `/api/products/${editingProduct.id}`, data);
+        return await apiRequest("PUT", `/api/products/${editingProduct.id}`, formattedData);
       }
-      return await apiRequest("POST", "/api/products", data);
+      return await apiRequest("POST", "/api/products", formattedData);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
@@ -195,7 +201,7 @@ export default function DashboardPage() {
       name: product.name,
       description: product.description,
       price: product.price,
-      discountPrice: product.discountPrice,
+      discountPrice: product.discountPrice || "",
       categoryId: product.categoryId,
       imageUrl: product.imageUrl,
       stock: product.stock,

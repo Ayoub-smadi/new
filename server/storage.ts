@@ -138,10 +138,18 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createProduct(product: InsertProduct) {
+    console.log("Storage: Creating product with:", JSON.stringify(product, null, 2));
+    
+    // Verify category exists
+    const [category] = await db.select().from(categories).where(eq(categories.id, product.categoryId));
+    if (!category) {
+      throw new Error(`التصنيف المحدد غير موجود (ID: ${product.categoryId})`);
+    }
+
     const [p] = await db.insert(products).values({
       ...product,
       price: product.price.toString(),
-      discountPrice: product.discountPrice?.toString() || null,
+      discountPrice: product.discountPrice ? product.discountPrice.toString() : null,
       rating: "0.0",
       reviewsCount: 0
     }).returning();
