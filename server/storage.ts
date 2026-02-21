@@ -2,6 +2,7 @@ import { db } from "./db";
 import { eq, desc, and, ilike, sql } from "drizzle-orm";
 import { 
   categories, type Category, type InsertCategory,
+  subCategories, type SubCategory, type InsertSubCategory,
   products, type Product, type InsertProduct,
   orders, type Order, type InsertOrder,
   orderItems, type OrderItem, type InsertOrderItem,
@@ -20,9 +21,14 @@ export interface IStorage {
   createCategory(category: InsertCategory): Promise<Category>;
   deleteCategory(id: string): Promise<void>;
   
+  // Sub-Categories
+  getSubCategories(categoryId?: string): Promise<SubCategory[]>;
+  createSubCategory(subCategory: InsertSubCategory): Promise<SubCategory>;
+  deleteSubCategory(id: string): Promise<void>;
+  
   // Products
-  getProducts(categoryId?: string, search?: string, featured?: boolean): Promise<(Product & { category: Category })[]>;
-  getProduct(id: string): Promise<(Product & { category: Category }) | undefined>;
+  getProducts(categoryId?: string, subCategoryId?: string, search?: string, featured?: boolean): Promise<(Product & { category: Category, subCategory?: SubCategory | null })[]>;
+  getProduct(id: string): Promise<(Product & { category: Category, subCategory?: SubCategory | null }) | undefined>;
   createProduct(product: InsertProduct): Promise<Product>;
   updateProduct(id: string, product: Partial<InsertProduct>): Promise<Product | undefined>;
   deleteProduct(id: string): Promise<void>;
@@ -67,43 +73,68 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteCategory(id: string) {
+    // Delete sub-categories first
+    await db.delete(subCategories).where(eq(subCategories.categoryId, id));
     // Delete products first
     await db.delete(products).where(eq(products.categoryId, id));
     await db.delete(categories).where(eq(categories.id, id));
   }
 
-  async getProducts(categoryId?: string, search?: string, featured?: boolean) {
+  async getSubCategories(categoryId?: string) {
+    if (categoryId) {
+      return await db.select().from(subCategories).where(eq(subCategories.categoryId, categoryId));
+    }
+    return await db.select().from(subCategories);
+  }
+
+  async createSubCategory(subCategory: InsertSubCategory) {
+    const [sc] = await db.insert(subCategories).values(subCategory).returning();
+    return sc;
+  }
+
+  async deleteSubCategory(id: string) {
+    // Set products' subCategoryId to null instead of deleting products
+    await db.update(products).set({ subCategoryId: null }).where(eq(products.subCategoryId, id));
+    await db.delete(subCategories).where(eq(subCategories.id, id));
+  }
+
+  async getProducts(categoryId?: string, subCategoryId?: string, search?: string, featured?: boolean) {
     let query = db.select({
       product: products,
-      category: categories
+      category: categories,
+      subCategory: subCategories
     }).from(products)
-    .innerJoin(categories, eq(products.categoryId, categories.id));
+    .innerJoin(categories, eq(products.categoryId, categories.id))
+    .leftJoin(subCategories, eq(products.subCategoryId, subCategories.id));
 
     const conditions = [];
     if (categoryId) conditions.push(eq(products.categoryId, categoryId));
+    if (subCategoryId) conditions.push(eq(products.subCategoryId, subCategoryId));
     if (search) conditions.push(ilike(products.name, `%${search}%`));
     if (featured !== undefined) conditions.push(eq(products.isFeatured, featured));
 
     if (conditions.length > 0) {
       const finalQuery = conditions.reduce((acc, condition) => and(acc, condition)!);
       const results = await query.where(finalQuery);
-      return results.map(r => ({ ...r.product, category: r.category }));
+      return results.map(r => ({ ...r.product, category: r.category, subCategory: r.subCategory }));
     }
 
     const results = await query;
-    return results.map(r => ({ ...r.product, category: r.category }));
+    return results.map(r => ({ ...r.product, category: r.category, subCategory: r.subCategory }));
   }
 
   async getProduct(id: string) {
     const results = await db.select({
       product: products,
-      category: categories
+      category: categories,
+      subCategory: subCategories
     }).from(products)
     .innerJoin(categories, eq(products.categoryId, categories.id))
+    .leftJoin(subCategories, eq(products.subCategoryId, subCategories.id))
     .where(eq(products.id, id));
 
     if (results.length === 0) return undefined;
-    return { ...results[0].product, category: results[0].category };
+    return { ...results[0].product, category: results[0].category, subCategory: results[0].subCategory };
   }
 
   async createProduct(product: InsertProduct) {

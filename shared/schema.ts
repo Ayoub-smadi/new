@@ -14,9 +14,18 @@ export const categories = pgTable("categories", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const subCategories = pgTable("sub_categories", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  categoryId: varchar("category_id").notNull().references(() => categories.id),
+  name: text("name").notNull(),
+  description: text("description"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const products = pgTable("products", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   categoryId: varchar("category_id").notNull().references(() => categories.id),
+  subCategoryId: varchar("sub_category_id").references(() => subCategories.id),
   name: text("name").notNull(),
   description: text("description").notNull(),
   price: numeric("price", { precision: 10, scale: 2 }).notNull(),
@@ -72,10 +81,23 @@ export const productsRelations = relations(products, ({ one, many }) => ({
     fields: [products.categoryId],
     references: [categories.id],
   }),
+  subCategory: one(subCategories, {
+    fields: [products.subCategoryId],
+    references: [subCategories.id],
+  }),
   reviews: many(reviews),
 }));
 
 export const categoriesRelations = relations(categories, ({ many }) => ({
+  products: many(products),
+  subCategories: many(subCategories),
+}));
+
+export const subCategoriesRelations = relations(subCategories, ({ one, many }) => ({
+  category: one(categories, {
+    fields: [subCategories.categoryId],
+    references: [categories.id],
+  }),
   products: many(products),
 }));
 
@@ -125,6 +147,7 @@ export const branchesRelations = relations(branches, ({}) => ({}));
 
 // Base Schemas
 export const insertCategorySchema = createInsertSchema(categories).omit({ id: true, createdAt: true });
+export const insertSubCategorySchema = createInsertSchema(subCategories).omit({ id: true, createdAt: true });
 export const insertProductSchema = createInsertSchema(products).omit({ id: true, createdAt: true, rating: true, reviewsCount: true });
 export const insertOrderSchema = createInsertSchema(orders).omit({ id: true, createdAt: true });
 export const insertOrderItemSchema = createInsertSchema(orderItems).omit({ id: true });
@@ -135,6 +158,8 @@ export const insertBranchSchema = createInsertSchema(branches).omit({ id: true, 
 // Types
 export type Category = typeof categories.$inferSelect;
 export type InsertCategory = z.infer<typeof insertCategorySchema>;
+export type SubCategory = typeof subCategories.$inferSelect;
+export type InsertSubCategory = z.infer<typeof insertSubCategorySchema>;
 export type Product = typeof products.$inferSelect;
 export type InsertProduct = z.infer<typeof insertProductSchema>;
 export type Order = typeof orders.$inferSelect;

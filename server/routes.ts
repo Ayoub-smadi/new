@@ -77,12 +77,34 @@ export async function registerRoutes(
     }
   });
 
+  app.get(api.categories.listSubCategories.path, async (req, res) => {
+    const subs = await storage.getSubCategories(req.params.id);
+    res.json(subs);
+  });
+
+  app.post(api.categories.createSubCategory.path, isAuthenticated, isAdminMiddleware, async (req, res) => {
+    try {
+      const input = api.categories.createSubCategory.input.parse(req.body);
+      const sub = await storage.createSubCategory({
+        ...input,
+        categoryId: req.params.id
+      });
+      res.status(201).json(sub);
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        return res.status(400).json({ message: err.errors[0].message });
+      }
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
   // PRODUCTS
   app.get(api.products.list.path, async (req, res) => {
-    const { categoryId, search, featured } = req.query;
+    const { categoryId, subCategoryId, search, featured } = req.query;
     const isFeatured = featured === 'true' ? true : featured === 'false' ? false : undefined;
     const prods = await storage.getProducts(
       categoryId as string, 
+      subCategoryId as string,
       search as string, 
       isFeatured
     );

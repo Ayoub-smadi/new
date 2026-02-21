@@ -1,11 +1,13 @@
 import { z } from 'zod';
 import { 
   insertCategorySchema, 
+  insertSubCategorySchema,
   insertProductSchema, 
   insertNurseryGallerySchema,
   OrderStatusEnum,
   PaymentMethodEnum,
   categories,
+  subCategories,
   products,
   orders,
   reviews,
@@ -58,6 +60,23 @@ export const api = {
         400: errorSchemas.validation,
         401: errorSchemas.unauthorized
       }
+    },
+    listSubCategories: {
+      method: 'GET' as const,
+      path: '/api/categories/:id/sub-categories' as const,
+      responses: {
+        200: z.array(z.custom<typeof subCategories.$inferSelect>()),
+      },
+    },
+    createSubCategory: {
+      method: 'POST' as const,
+      path: '/api/categories/:id/sub-categories' as const,
+      input: insertSubCategorySchema.omit({ categoryId: true }),
+      responses: {
+        201: z.custom<typeof subCategories.$inferSelect>(),
+        400: errorSchemas.validation,
+        401: errorSchemas.unauthorized
+      }
     }
   },
   products: {
@@ -66,18 +85,19 @@ export const api = {
       path: '/api/products' as const,
       input: z.object({
         categoryId: z.string().optional(),
+        subCategoryId: z.string().optional(),
         search: z.string().optional(),
         featured: z.string().optional(), // 'true' or 'false' string from query
       }).optional(),
       responses: {
-        200: z.array(z.custom<typeof products.$inferSelect & { category: typeof categories.$inferSelect }>()),
+        200: z.array(z.custom<typeof products.$inferSelect & { category: typeof categories.$inferSelect, subCategory: typeof subCategories.$inferSelect | null }>()),
       },
     },
     get: {
       method: 'GET' as const,
       path: '/api/products/:id' as const,
       responses: {
-        200: z.custom<typeof products.$inferSelect & { category: typeof categories.$inferSelect }>(),
+        200: z.custom<typeof products.$inferSelect & { category: typeof categories.$inferSelect, subCategory: typeof subCategories.$inferSelect | null }>(),
         404: errorSchemas.notFound,
       }
     },
