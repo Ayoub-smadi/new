@@ -232,8 +232,43 @@ export default function DashboardPage() {
                       name="imageUrl"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>رابط الصورة</FormLabel>
-                          <FormControl><Input {...field} /></FormControl>
+                          <FormLabel>صورة التصنيف</FormLabel>
+                          <FormControl>
+                            <div className="space-y-2">
+                              <Input 
+                                type="file" 
+                                accept="image/*"
+                                onChange={async (e) => {
+                                  const file = e.target.files?.[0];
+                                  if (file) {
+                                    const formData = new FormData();
+                                    formData.append("file", file);
+                                    try {
+                                      const res = await fetch("/api/upload", {
+                                        method: "POST",
+                                        body: formData,
+                                      });
+                                      if (res.ok) {
+                                        const data = await res.json();
+                                        field.onChange(data.url);
+                                        toast({ title: "تم رفع الصورة بنجاح" });
+                                      } else {
+                                        toast({ title: "فشل رفع الصورة", variant: "destructive" });
+                                      }
+                                    } catch (error) {
+                                      toast({ title: "خطأ في الاتصال بالسيرفر", variant: "destructive" });
+                                    }
+                                  }
+                                }}
+                              />
+                              {field.value && (
+                                <div className="relative w-20 h-20 rounded border overflow-hidden">
+                                  <img src={field.value} alt="Preview" className="w-full h-full object-cover" />
+                                </div>
+                              )}
+                              <Input {...field} placeholder="أو أدخل رابط الصورة هنا" />
+                            </div>
+                          </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
