@@ -147,6 +147,7 @@ export default function DashboardPage() {
       name: "",
       description: "",
       price: "0",
+      discountPrice: null,
       categoryId: "",
       subCategoryId: "",
       imageUrl: "",
@@ -194,6 +195,7 @@ export default function DashboardPage() {
       name: product.name,
       description: product.description,
       price: product.price,
+      discountPrice: product.discountPrice,
       categoryId: product.categoryId,
       imageUrl: product.imageUrl,
       stock: product.stock,
@@ -544,6 +546,17 @@ export default function DashboardPage() {
                               <Input {...field} placeholder="أو أدخل رابط الصورة هنا" />
                             </div>
                           </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={productForm.control}
+                      name="discountPrice"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>سعر الخصم (اختياري)</FormLabel>
+                          <FormControl><Input type="number" {...field} value={field.value || ""} onChange={e => field.onChange(e.target.value || null)} /></FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
