@@ -82,12 +82,16 @@ export async function registerRoutes(
     res.json(subs);
   });
 
-  app.post(api.categories.createSubCategory.path, isAuthenticated, isAdminMiddleware, async (req, res) => {
+  app.post(api.categories.createSubCategory.path, isAuthenticated, isAdminMiddleware, async (req: Request, res) => {
     try {
+      const id = req.params.id;
+      if (typeof id !== 'string') {
+        return res.status(400).json({ message: "Invalid category ID" });
+      }
       const input = api.categories.createSubCategory.input.parse(req.body);
       const sub = await storage.createSubCategory({
         ...input,
-        categoryId: req.params.id
+        categoryId: id
       });
       res.status(201).json(sub);
     } catch (err) {
