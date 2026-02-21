@@ -1,10 +1,35 @@
-import type { Express } from "express";
+import type { Express, Request } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { api } from "@shared/routes";
 import { z } from "zod";
 import { setupAuth, registerAuthRoutes, isAuthenticated } from "./replit_integrations/auth";
 import type { RequestHandler } from "express";
+import multer from "multer";
+import path from "path";
+import fs from "fs";
+
+// Extend Request type to include multer's file
+interface MulterRequest extends Request {
+  file?: Express.Multer.File;
+}
+
+// Configure multer for file uploads
+const storage_multer = multer.diskStorage({
+  destination: function (req: any, file: any, cb: any) {
+    const uploadPath = path.join(process.cwd(), "client", "public", "uploads");
+    if (!fs.existsSync(uploadPath)) {
+      fs.mkdirSync(uploadPath, { recursive: true });
+    }
+    cb(null, uploadPath);
+  },
+  filename: function (req: any, file: any, cb: any) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({ storage: storage_multer });
 
 export async function registerRoutes(
   httpServer: Server,
@@ -13,6 +38,15 @@ export async function registerRoutes(
   // Setup auth FIRST
   await setupAuth(app);
   registerAuthRoutes(app);
+
+  // File upload route
+  app.post("/api/upload", isAuthenticated, upload.single("file"), (req: MulterRequest, res) => {
+    if (!req.file) {
+      return res.status(400).json({ message: "No file uploaded" });
+    }
+    const fileUrl = `/uploads/${req.file.filename}`;
+    res.json({ url: fileUrl });
+  });
 
   // ADMIN CHECK MIDDLEWARE
   const isAdminMiddleware: RequestHandler = async (req: any, res, next) => {
