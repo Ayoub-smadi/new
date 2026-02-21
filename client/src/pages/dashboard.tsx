@@ -10,6 +10,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { Product, Category, SubCategory, insertProductSchema, insertCategorySchema, insertSubCategorySchema } from "@shared/schema";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { api } from "@shared/routes";
 import {
   Dialog,
   DialogContent,
