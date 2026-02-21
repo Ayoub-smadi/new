@@ -7,7 +7,8 @@ import {
   orderItems, type OrderItem, type InsertOrderItem,
   reviews, type Review, type InsertReview,
   users, type User,
-  nurseryGallery, type NurseryGallery, type InsertNurseryGallery
+  nurseryGallery, type NurseryGallery, type InsertNurseryGallery,
+  branches, type Branch, type InsertBranch
 } from "@shared/schema";
 
 export interface IStorage {
@@ -40,10 +41,30 @@ export interface IStorage {
   getNurseryGallery(): Promise<NurseryGallery[]>;
   createNurseryItem(item: InsertNurseryGallery): Promise<NurseryGallery>;
   deleteNurseryItem(id: string): Promise<void>;
+
+  // Branches
+  getBranches(): Promise<Branch[]>;
+  createBranch(branch: InsertBranch): Promise<Branch>;
+  deleteBranch(id: string): Promise<void>;
   
   // Admin Stats
   getAdminStats(): Promise<{ totalProducts: number, totalUsers: number, totalOrders: number, totalRevenue: number, lowStockProducts: number }>;
 }
+
+export class DatabaseStorage implements IStorage {
+  // ... existing methods ...
+  async getBranches() {
+    return await db.select().from(branches);
+  }
+
+  async createBranch(branch: InsertBranch) {
+    const [res] = await db.insert(branches).values(branch).returning();
+    return res;
+  }
+
+  async deleteBranch(id: string) {
+    await db.delete(branches).where(eq(branches.id, id));
+  }
 
 export class DatabaseStorage implements IStorage {
   async getCategories() {

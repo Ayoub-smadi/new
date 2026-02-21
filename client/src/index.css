@@ -5,28 +5,28 @@
 @tailwind utilities;
 
 :root {
-  /* Agricultural Palette: Deep Green, Fresh Green, Earthy Brown/Orange, Clean White */
-  --background: 0 0% 100%; /* White */
-  --foreground: 150 5% 10%; /* Dark Gray */
+  /* Agricultural Palette: Deep Forest Green, Golden Harvest, Earthy Brown, Cream White */
+  --background: 40 30% 98%; /* Cream White */
+  --foreground: 150 20% 12%; /* Deep Forest Green */
 
-  --primary: 142 76% 36%; /* #16a34a - Green 600 */
-  --primary-foreground: 0 0% 100%;
+  --primary: 158 60% 25%; /* #1a4731 - Deep Forest Green */
+  --primary-foreground: 40 30% 98%;
 
-  --secondary: 142 70% 95%; /* Very Light Green */
-  --secondary-foreground: 142 76% 36%;
+  --secondary: 45 90% 92%; /* Soft Golden */
+  --secondary-foreground: 158 60% 20%;
 
-  --muted: 150 10% 96%;
-  --muted-foreground: 150 5% 40%;
+  --muted: 45 20% 94%;
+  --muted-foreground: 158 10% 45%;
 
-  --accent: 24 95% 53%; /* #f97316 - Orange 500 (Harvest/Fruit) */
-  --accent-foreground: 0 0% 100%;
+  --accent: 38 90% 50%; /* #f59e0b - Golden Harvest/Amber */
+  --accent-foreground: 158 60% 10%;
 
-  --destructive: 0 84% 60%;
+  --destructive: 0 70% 50%;
   --destructive-foreground: 0 0% 98%;
 
-  --border: 150 10% 90%;
-  --input: 150 10% 90%;
-  --ring: 142 76% 36%;
+  --border: 158 20% 88%;
+  --input: 158 20% 88%;
+  --ring: 158 60% 25%;
 
   --radius: 0.75rem;
 

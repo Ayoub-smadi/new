@@ -112,6 +112,17 @@ export const reviewsRelations = relations(reviews, ({ one }) => ({
   }),
 }));
 
+export const branches = pgTable("branches", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  description: text("description").notNull(),
+  imageUrl: text("image_url").notNull(),
+  locationUrl: text("location_url").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const branchesRelations = relations(branches, ({}) => ({}));
+
 // Base Schemas
 export const insertCategorySchema = createInsertSchema(categories).omit({ id: true, createdAt: true });
 export const insertProductSchema = createInsertSchema(products).omit({ id: true, createdAt: true, rating: true, reviewsCount: true });
@@ -119,6 +130,7 @@ export const insertOrderSchema = createInsertSchema(orders).omit({ id: true, cre
 export const insertOrderItemSchema = createInsertSchema(orderItems).omit({ id: true });
 export const insertReviewSchema = createInsertSchema(reviews).omit({ id: true, createdAt: true });
 export const insertNurseryGallerySchema = createInsertSchema(nurseryGallery).omit({ id: true, createdAt: true });
+export const insertBranchSchema = createInsertSchema(branches).omit({ id: true, createdAt: true });
 
 // Types
 export type Category = typeof categories.$inferSelect;
@@ -133,6 +145,8 @@ export type Review = typeof reviews.$inferSelect;
 export type InsertReview = z.infer<typeof insertReviewSchema>;
 export type NurseryGallery = typeof nurseryGallery.$inferSelect;
 export type InsertNurseryGallery = z.infer<typeof insertNurseryGallerySchema>;
+export type Branch = typeof branches.$inferSelect;
+export type InsertBranch = z.infer<typeof insertBranchSchema>;
 
 export type User = typeof users.$inferSelect;
 export type UpsertUser = typeof users.$inferInsert;
