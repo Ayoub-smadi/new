@@ -123,8 +123,12 @@ export async function registerRoutes(
 
   app.post(api.products.create.path, isAuthenticated, isAdminMiddleware, async (req, res) => {
     try {
-      console.log("Creating product with body:", JSON.stringify(req.body, null, 2));
-      const input = api.products.create.input.parse(req.body);
+      const body = { ...req.body };
+      if (body.subCategoryId === "none") {
+        body.subCategoryId = null;
+      }
+      console.log("Creating product with body (sanitized):", JSON.stringify(body, null, 2));
+      const input = api.products.create.input.parse(body);
       const prod = await storage.createProduct(input);
       console.log("Product created successfully:", prod.id);
       res.status(201).json(prod);
@@ -140,15 +144,19 @@ export async function registerRoutes(
 
   app.put(api.products.update.path, isAuthenticated, isAdminMiddleware, async (req, res) => {
     try {
-      const input = api.products.update.input.parse(req.body);
+      const body = { ...req.body };
+      if (body.subCategoryId === "none") {
+        body.subCategoryId = null;
+      }
+      const input = api.products.update.input.parse(body);
       const prod = await storage.updateProduct(req.params.id as string, input);
       if (!prod) return res.status(404).json({ message: "Product not found" });
       res.json(prod);
-    } catch (err) {
+    } catch (err: any) {
       if (err instanceof z.ZodError) {
         return res.status(400).json({ message: err.errors[0].message, field: err.errors[0].path.join('.') });
       }
-      res.status(500).json({ message: "Internal server error" });
+      res.status(500).json({ message: err.message || "Internal server error" });
     }
   });
 

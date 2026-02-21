@@ -161,9 +161,11 @@ export default function DashboardPage() {
       const formattedData = {
         ...data,
         price: data.price.toString(),
-        discountPrice: data.discountPrice ? data.discountPrice.toString() : null,
+        discountPrice: (data.discountPrice && data.discountPrice !== "") ? data.discountPrice.toString() : null,
         stock: parseInt(data.stock.toString()) || 0,
+        subCategoryId: (data.subCategoryId === "none" || !data.subCategoryId) ? null : data.subCategoryId,
       };
+      console.log("Sending formatted data:", formattedData);
       if (editingProduct) {
         return await apiRequest("PUT", `/api/products/${editingProduct.id}`, formattedData);
       }
