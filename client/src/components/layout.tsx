@@ -118,16 +118,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   <DropdownMenuSeparator />
                   <Link href="/dashboard">
                     <DropdownMenuItem className="cursor-pointer justify-end">
-                      لوحة التحكم
+                      لوحة التحكم <LayoutDashboard className="ml-2 h-4 w-4" />
                     </DropdownMenuItem>
                   </Link>
-                  {isAdmin && (
-                    <Link href="/admin">
-                      <DropdownMenuItem className="cursor-pointer justify-end">
-                         إدارة المتجر <LayoutDashboard className="ml-2 h-4 w-4" />
-                      </DropdownMenuItem>
-                    </Link>
-                  )}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem 
                     className="cursor-pointer text-destructive justify-end focus:text-destructive"
