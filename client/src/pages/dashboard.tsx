@@ -7,7 +7,7 @@ import { Loader2, Package, Clock, CheckCircle, Plus, Edit, Trash2, LayoutDashboa
 import { format } from "date-fns";
 import { ar } from "date-fns/locale";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Product, Category } from "@shared/schema";
+import { Product, Category, insertProductSchema, insertCategorySchema } from "@shared/schema";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -36,7 +36,6 @@ import {
 } from "@/components/ui/select";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { insertProductSchema } from "@shared/schema";
 import { useState } from "react";
 
 export default function DashboardPage() {
@@ -44,6 +43,7 @@ export default function DashboardPage() {
   const { toast } = useToast();
   const { data: orders, isLoading: ordersLoading } = useOrders();
   const [isProductDialogOpen, setIsProductDialogOpen] = useState(false);
+  const [isCategoryDialogOpen, setIsCategoryDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
   const { data: products, isLoading: productsLoading } = useQuery<Product[]>({
@@ -52,6 +52,38 @@ export default function DashboardPage() {
 
   const { data: categories } = useQuery<Category[]>({
     queryKey: ["/api/categories"],
+  });
+
+  const categoryForm = useForm({
+    resolver: zodResolver(insertCategorySchema),
+    defaultValues: {
+      name: "",
+      description: "",
+      imageUrl: "",
+    },
+  });
+
+  const categoryMutation = useMutation({
+    mutationFn: async (data: any) => {
+      return await apiRequest("POST", "/api/categories", data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/categories"] });
+      setIsCategoryDialogOpen(false);
+      categoryForm.reset();
+      toast({ title: "تم إضافة التصنيف بنجاح" });
+    },
+  });
+
+  const deleteCategoryMutation = useMutation({
+    mutationFn: async (id: string) => {
+      await apiRequest("DELETE", `/api/categories/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/categories"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/products"] });
+      toast({ title: "تم حذف التصنيف بنجاح" });
+    },
   });
 
   const deleteProductMutation = useMutation({
@@ -161,6 +193,59 @@ export default function DashboardPage() {
 
         {isAdmin && (
           <div className="flex gap-2">
+            <Dialog open={isCategoryDialogOpen} onOpenChange={setIsCategoryDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="gap-2">
+                  <Plus className="h-4 w-4" /> إضافة تصنيف
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-md">
+                <DialogHeader>
+                  <DialogTitle>إضافة تصنيف جديد</DialogTitle>
+                </DialogHeader>
+                <Form {...categoryForm}>
+                  <form onSubmit={categoryForm.handleSubmit((data) => categoryMutation.mutate(data))} className="space-y-4 text-right">
+                    <FormField
+                      control={categoryForm.control}
+                      name="name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>اسم التصنيف</FormLabel>
+                          <FormControl><Input {...field} /></FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={categoryForm.control}
+                      name="description"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>الوصف</FormLabel>
+                          <FormControl><Textarea {...field} /></FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={categoryForm.control}
+                      name="imageUrl"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>رابط الصورة</FormLabel>
+                          <FormControl><Input {...field} /></FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <Button type="submit" className="w-full" disabled={categoryMutation.isPending}>
+                      {categoryMutation.isPending ? <Loader2 className="animate-spin" /> : "حفظ التصنيف"}
+                    </Button>
+                  </form>
+                </Form>
+              </DialogContent>
+            </Dialog>
+
             <Dialog open={isProductDialogOpen} onOpenChange={setIsProductDialogOpen}>
               <DialogTrigger asChild>
                 <Button className="gap-2" onClick={() => {
@@ -302,6 +387,52 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid gap-8">
+        {isAdmin && (
+          <section>
+            <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+              <Settings className="h-5 w-5" /> إدارة التصنيفات
+            </h2>
+            <div className="bg-card border rounded-lg overflow-hidden mb-8">
+              <div className="overflow-x-auto">
+                <table className="w-full text-right text-sm">
+                  <thead className="bg-muted text-muted-foreground font-medium border-b">
+                    <tr>
+                      <th className="p-4">التصنيف</th>
+                      <th className="p-4">الوصف</th>
+                      <th className="p-4">إجراءات</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y">
+                    {categories?.map((category) => (
+                      <tr key={category.id}>
+                        <td className="p-4 flex items-center gap-3">
+                          <img src={category.imageUrl || ""} className="w-8 h-8 rounded object-cover" alt="" />
+                          <span className="font-medium">{category.name}</span>
+                        </td>
+                        <td className="p-4">{category.description}</td>
+                        <td className="p-4">
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="text-destructive" 
+                            onClick={() => {
+                              if (confirm("هل أنت متأكد من حذف هذا التصنيف؟ سيتم حذف جميع المنتجات المرتبطة به.")) {
+                                deleteCategoryMutation.mutate(category.id);
+                              }
+                            }}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+        )}
+
         {isAdmin && (
           <section>
             <h2 className="text-xl font-bold mb-4 flex items-center gap-2">

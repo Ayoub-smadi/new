@@ -1,3 +1,4 @@
+import heroPlants from "@/assets/images/hero-plants.png";
 import { useProducts, useCategories } from "@/hooks/use-products";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -15,11 +16,11 @@ export default function Home() {
       {/* Hero Section */}
       <section className="relative h-[600px] flex items-center justify-center overflow-hidden bg-gradient-to-b from-primary/10 to-background">
         <div className="absolute inset-0 z-0">
-          {/* Unsplash agricultural background */}
-          <div className="absolute inset-0 bg-primary/20 z-10 mix-blend-multiply" />
+          {/* Subtle overlay */}
+          <div className="absolute inset-0 bg-black/30 z-10" />
           <img 
-            src="https://images.unsplash.com/photo-1625246333195-78d9c38ad449?q=80&w=1740&auto=format&fit=crop" 
-            alt="Farm landscape" 
+            src={heroPlants} 
+            alt="Modern Nursery" 
             className="w-full h-full object-cover"
           />
         </div>
