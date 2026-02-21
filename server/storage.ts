@@ -52,21 +52,6 @@ export interface IStorage {
 }
 
 export class DatabaseStorage implements IStorage {
-  // ... existing methods ...
-  async getBranches() {
-    return await db.select().from(branches);
-  }
-
-  async createBranch(branch: InsertBranch) {
-    const [res] = await db.insert(branches).values(branch).returning();
-    return res;
-  }
-
-  async deleteBranch(id: string) {
-    await db.delete(branches).where(eq(branches.id, id));
-  }
-
-export class DatabaseStorage implements IStorage {
   async getCategories() {
     return await db.select().from(categories);
   }
@@ -247,6 +232,19 @@ export class DatabaseStorage implements IStorage {
 
   async deleteNurseryItem(id: string) {
     await db.delete(nurseryGallery).where(eq(nurseryGallery.id, id));
+  }
+
+  async getBranches() {
+    return await db.select().from(branches);
+  }
+
+  async createBranch(branch: InsertBranch) {
+    const [res] = await db.insert(branches).values(branch).returning();
+    return res;
+  }
+
+  async deleteBranch(id: string) {
+    await db.delete(branches).where(eq(branches.id, id));
   }
 
   async getAdminStats() {
