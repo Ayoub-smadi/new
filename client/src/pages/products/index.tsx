@@ -1,3 +1,5 @@
+import { Product, Category, SubCategory } from "@shared/schema";
+import { useQuery } from "@tanstack/react-query";
 import { useProducts, useCategories } from "@/hooks/use-products";
 import { useCart } from "@/hooks/use-cart";
 import { Button } from "@/components/ui/button";
@@ -18,15 +20,21 @@ export default function ProductsPage() {
 
   const [search, setSearch] = useState(initialSearch);
   const [categoryId, setCategoryId] = useState(initialCategory);
+  const [subCategoryId, setSubCategoryId] = useState("");
   
   // Debounced search could be implemented here, simplified for MVP
   const { data: products, isLoading } = useProducts({ 
     search: search || undefined, 
     categoryId: categoryId || undefined,
+    subCategoryId: subCategoryId || undefined,
     featured: initialFeatured || undefined
   });
   
   const { data: categories } = useCategories();
+  const { data: subCategories } = useQuery<SubCategory[]>({
+    queryKey: [categoryId ? `/api/categories/${categoryId}/sub-categories` : "/api/sub-categories"],
+    enabled: !!categoryId,
+  });
   const { addItem } = useCart();
 
   const handleCategoryChange = (id: string) => {
@@ -71,18 +79,37 @@ export default function ProductsPage() {
               <div className="py-6 space-y-6">
                 <div>
                   <h3 className="font-semibold mb-3">التصنيفات</h3>
-                  <div className="flex flex-col gap-2">
-                    {categories?.map(cat => (
-                      <Button 
-                        key={cat.id} 
-                        variant={categoryId === cat.id ? "default" : "ghost"} 
-                        className="justify-start"
-                        onClick={() => handleCategoryChange(cat.id)}
-                      >
-                        {cat.name}
-                      </Button>
-                    ))}
-                  </div>
+                    <div className="flex flex-col gap-2">
+                      {categories?.map(cat => (
+                        <div key={cat.id} className="flex flex-col gap-1">
+                          <Button 
+                            variant={categoryId === cat.id ? "default" : "ghost"} 
+                            className="justify-start"
+                            onClick={() => {
+                              setCategoryId(cat.id === categoryId ? "" : cat.id);
+                              setSubCategoryId("");
+                            }}
+                          >
+                            {cat.name}
+                          </Button>
+                          {categoryId === cat.id && subCategories && subCategories.length > 0 && (
+                            <div className="mr-4 flex flex-col gap-1 border-r-2 border-primary/20 pr-2">
+                              {subCategories.map(sub => (
+                                <Button
+                                  key={sub.id}
+                                  variant={subCategoryId === sub.id ? "secondary" : "ghost"}
+                                  size="sm"
+                                  className="justify-start h-8 text-xs"
+                                  onClick={() => setSubCategoryId(sub.id === subCategoryId ? "" : sub.id)}
+                                >
+                                  {sub.name}
+                                </Button>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
                 </div>
                 {(categoryId || search) && (
                   <Button variant="destructive" className="w-full" onClick={clearFilters}>
@@ -105,17 +132,37 @@ export default function ProductsPage() {
             <div className="space-y-2">
               <div 
                 className={`cursor-pointer px-3 py-2 rounded-md transition-colors ${!categoryId ? "bg-primary/10 text-primary font-medium" : "hover:bg-muted"}`}
-                onClick={() => setCategoryId("")}
+                onClick={() => {
+                  setCategoryId("");
+                  setSubCategoryId("");
+                }}
               >
                 الكل
               </div>
               {categories?.map(cat => (
-                <div 
-                  key={cat.id}
-                  className={`cursor-pointer px-3 py-2 rounded-md transition-colors ${categoryId === cat.id ? "bg-primary/10 text-primary font-medium" : "hover:bg-muted"}`}
-                  onClick={() => setCategoryId(cat.id)}
-                >
-                  {cat.name}
+                <div key={cat.id}>
+                  <div 
+                    className={`cursor-pointer px-3 py-2 rounded-md transition-colors ${categoryId === cat.id ? "bg-primary/10 text-primary font-medium" : "hover:bg-muted"}`}
+                    onClick={() => {
+                      setCategoryId(cat.id);
+                      setSubCategoryId("");
+                    }}
+                  >
+                    {cat.name}
+                  </div>
+                  {categoryId === cat.id && subCategories && subCategories.length > 0 && (
+                    <div className="mr-4 mt-1 space-y-1 border-r-2 border-primary/20 pr-2">
+                      {subCategories.map(sub => (
+                        <div 
+                          key={sub.id}
+                          className={`cursor-pointer px-2 py-1 rounded text-sm transition-colors ${subCategoryId === sub.id ? "text-primary font-bold" : "text-muted-foreground hover:text-primary"}`}
+                          onClick={() => setSubCategoryId(sub.id === subCategoryId ? "" : sub.id)}
+                        >
+                          {sub.name}
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

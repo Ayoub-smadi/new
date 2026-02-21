@@ -4,9 +4,10 @@ import type { InsertProduct, InsertCategory } from "@shared/schema";
 
 // --- Products ---
 
-export function useProducts(filters?: { categoryId?: string; search?: string; featured?: boolean }) {
+export function useProducts(filters?: { categoryId?: string; subCategoryId?: string; search?: string; featured?: boolean }) {
   const queryParams = new URLSearchParams();
   if (filters?.categoryId) queryParams.append("categoryId", filters.categoryId);
+  if (filters?.subCategoryId) queryParams.append("subCategoryId", filters.subCategoryId);
   if (filters?.search) queryParams.append("search", filters.search);
   if (filters?.featured) queryParams.append("featured", String(filters.featured));
 

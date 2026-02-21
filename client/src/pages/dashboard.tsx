@@ -7,7 +7,7 @@ import { Loader2, Package, Clock, CheckCircle, Plus, Edit, Trash2, LayoutDashboa
 import { format } from "date-fns";
 import { ar } from "date-fns/locale";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Product, Category, insertProductSchema, insertCategorySchema } from "@shared/schema";
+import { Product, Category, SubCategory, insertProductSchema, insertCategorySchema, insertSubCategorySchema } from "@shared/schema";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -96,6 +96,50 @@ export default function DashboardPage() {
     },
   });
 
+  const [selectedCategoryIdForSub, setSelectedCategoryIdForSub] = useState<string>("");
+  const [isSubCategoryDialogOpen, setIsSubCategoryDialogOpen] = useState(false);
+
+  const { data: subCategories } = useQuery<SubCategory[]>({
+    queryKey: [selectedCategoryIdForSub ? `/api/categories/${selectedCategoryIdForSub}/sub-categories` : "/api/sub-categories"],
+    enabled: !!selectedCategoryIdForSub || isProductDialogOpen,
+  });
+
+  const subCategoryForm = useForm({
+    resolver: zodResolver(insertSubCategorySchema),
+    defaultValues: {
+      name: "",
+      description: "",
+      categoryId: "",
+    },
+  });
+
+  const subCategoryMutation = useMutation({
+    mutationFn: async (data: any) => {
+      return await apiRequest("POST", `/api/categories/${data.categoryId}/sub-categories`, {
+        name: data.name,
+        description: data.description
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [api.categories.list.path] });
+      queryClient.invalidateQueries({ queryKey: ["/api/sub-categories"] });
+      setIsSubCategoryDialogOpen(false);
+      subCategoryForm.reset();
+      toast({ title: "تم إضافة التصنيف الفرعي بنجاح" });
+    },
+  });
+
+  const deleteSubCategoryMutation = useMutation({
+    mutationFn: async (id: string) => {
+      await apiRequest("DELETE", `/api/categories/sub/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [api.categories.list.path] });
+      queryClient.invalidateQueries({ queryKey: [api.products.list.path] });
+      toast({ title: "تم حذف التصنيف الفرعي بنجاح" });
+    },
+  });
+
   const productForm = useForm({
     resolver: zodResolver(insertProductSchema),
     defaultValues: {
@@ -103,6 +147,7 @@ export default function DashboardPage() {
       description: "",
       price: "0",
       categoryId: "",
+      subCategoryId: "",
       imageUrl: "",
       stock: 0,
       isFeatured: false,
@@ -281,6 +326,70 @@ export default function DashboardPage() {
               </DialogContent>
             </Dialog>
 
+            <Dialog open={isSubCategoryDialogOpen} onOpenChange={setIsSubCategoryDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="gap-2">
+                  <Plus className="h-4 w-4" /> إضافة تصنيف فرعي
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-md">
+                <DialogHeader>
+                  <DialogTitle>إضافة تصنيف فرعي جديد</DialogTitle>
+                </DialogHeader>
+                <Form {...subCategoryForm}>
+                  <form onSubmit={subCategoryForm.handleSubmit((data) => subCategoryMutation.mutate(data))} className="space-y-4 text-right">
+                    <FormField
+                      control={subCategoryForm.control}
+                      name="categoryId"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>التصنيف الرئيسي</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="اختر التصنيف الرئيسي" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {categories?.map((cat) => (
+                                <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={subCategoryForm.control}
+                      name="name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>اسم التصنيف الفرعي</FormLabel>
+                          <FormControl><Input {...field} /></FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={subCategoryForm.control}
+                      name="description"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>الوصف</FormLabel>
+                          <FormControl><Textarea {...field} /></FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <Button type="submit" className="w-full" disabled={subCategoryMutation.isPending}>
+                      {subCategoryMutation.isPending ? <Loader2 className="animate-spin" /> : "حفظ التصنيف الفرعي"}
+                    </Button>
+                  </form>
+                </Form>
+              </DialogContent>
+            </Dialog>
+
             <Dialog open={isProductDialogOpen} onOpenChange={setIsProductDialogOpen}>
               <DialogTrigger asChild>
                 <Button className="gap-2" onClick={() => {
@@ -342,28 +451,56 @@ export default function DashboardPage() {
                         )}
                       />
                     </div>
-                    <FormField
-                      control={productForm.control}
-                      name="categoryId"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>التصنيف</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="اختر تصنيفاً" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {categories?.map((cat) => (
-                                <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                    <div className="grid grid-cols-2 gap-4">
+                      <FormField
+                        control={productForm.control}
+                        name="categoryId"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>التصنيف</FormLabel>
+                            <Select onValueChange={(val) => {
+                              field.onChange(val);
+                              setSelectedCategoryIdForSub(val);
+                            }} defaultValue={field.value}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="اختر تصنيفاً" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {categories?.map((cat) => (
+                                  <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={productForm.control}
+                        name="subCategoryId"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>التصنيف الفرعي</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value || undefined}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="اختر تصنيفاً فرعياً (اختياري)" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="none">بدون تصنيف فرعي</SelectItem>
+                                {subCategories?.filter(s => s.categoryId === productForm.getValues("categoryId")).map((sub) => (
+                                  <SelectItem key={sub.id} value={sub.id}>{sub.name}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
                     <FormField
                       control={productForm.control}
                       name="imageUrl"
