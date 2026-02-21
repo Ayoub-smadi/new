@@ -126,11 +126,12 @@ export async function registerRoutes(
       const input = api.products.create.input.parse(req.body);
       const prod = await storage.createProduct(input);
       res.status(201).json(prod);
-    } catch (err) {
+    } catch (err: any) {
+      console.error("Error creating product:", err);
       if (err instanceof z.ZodError) {
         return res.status(400).json({ message: err.errors[0].message, field: err.errors[0].path.join('.') });
       }
-      res.status(500).json({ message: "Internal server error" });
+      res.status(500).json({ message: err.message || "Internal server error" });
     }
   });
 

@@ -138,7 +138,13 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createProduct(product: InsertProduct) {
-    const [p] = await db.insert(products).values(product).returning();
+    const [p] = await db.insert(products).values({
+      ...product,
+      price: product.price.toString(),
+      discountPrice: product.discountPrice?.toString() || null,
+      rating: "0.0",
+      reviewsCount: 0
+    }).returning();
     return p;
   }
 
