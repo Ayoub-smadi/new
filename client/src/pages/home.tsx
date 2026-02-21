@@ -179,13 +179,13 @@ export default function Home() {
           <div className="absolute bottom-0 left-0 w-64 h-64 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/2 blur-3xl" />
           
           <div className="relative z-10 max-w-2xl mx-auto space-y-6">
-            <h2 className="text-3xl md:text-4xl font-bold">هل أنت مستعد لبدء موسم الحصاد؟</h2>
+            <h2 className="text-3xl md:text-4xl font-bold">تسوق أفضل المنتجات الزراعية الآن</h2>
             <p className="text-primary-foreground/80 text-lg">
-              انضم إلى آلاف المزارعين الذين يثقون في منتجاتنا. سجل الآن واحصل على عروض حصرية.
+              كل ما تحتاجه لزراعتك ومنزلك في مكان واحد. جودة عالية وأسعار منافسة.
             </p>
-            <Link href="/api/login">
+            <Link href="/products">
               <Button size="lg" variant="secondary" className="text-primary font-bold text-lg px-8">
-                انشاء حساب مجاني
+                الذهاب للمتجر
               </Button>
             </Link>
           </div>
