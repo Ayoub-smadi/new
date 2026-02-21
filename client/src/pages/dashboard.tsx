@@ -93,6 +93,23 @@ export default function DashboardPage() {
     },
   });
 
+  const updateOrderStatusMutation = useMutation({
+    mutationFn: async ({ id, status }: { id: string, status: string }) => {
+      await apiRequest("PATCH", `/api/orders/${id}/status`, { status });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
+      toast({ title: "تم تحديث حالة الطلب بنجاح" });
+    },
+    onError: (error: any) => {
+      toast({ 
+        title: "فشل تحديث الطلب", 
+        description: error.message,
+        variant: "destructive" 
+      });
+    }
+  });
+
   const onEditProduct = (product: Product) => {
     setEditingProduct(product);
     productForm.reset({
@@ -303,6 +320,54 @@ export default function DashboardPage() {
             <Package className="h-5 w-5" /> {isAdmin ? "جميع الطلبات" : "طلباتي"}
           </h2>
 
+          {isAdmin && (
+            <div className="mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
+              <Card className="bg-primary/5 border-primary/20">
+                <CardContent className="p-4 flex flex-col items-center justify-center text-center">
+                  <span className="text-sm text-muted-foreground mb-1">إجمالي الطلبات</span>
+                  <span className="text-2xl font-bold">{orders?.length || 0}</span>
+                </CardContent>
+              </Card>
+              <Card className="bg-yellow-500/5 border-yellow-500/20">
+                <CardContent className="p-4 flex flex-col items-center justify-center text-center">
+                  <span className="text-sm text-muted-foreground mb-1">قيد المعالجة</span>
+                  <span className="text-2xl font-bold text-yellow-600">
+                    {orders?.filter(o => o.status === 'processing').length || 0}
+                  </span>
+                </CardContent>
+              </Card>
+              <Card className="bg-green-500/5 border-green-500/20">
+                <CardContent className="p-4 flex flex-col items-center justify-center text-center">
+                  <span className="text-sm text-muted-foreground mb-1">تم التوصيل</span>
+                  <span className="text-2xl font-bold text-green-600">
+                    {orders?.filter(o => o.status === 'delivered').length || 0}
+                  </span>
+                </CardContent>
+              </Card>
+              <Card className="bg-blue-500/5 border-blue-500/20">
+                <CardContent className="p-4 flex flex-col items-center justify-center text-center">
+                  <span className="text-sm text-muted-foreground mb-1">تم الشحن</span>
+                  <span className="text-2xl font-bold text-blue-600">
+                    {orders?.filter(o => o.status === 'shipped').length || 0}
+                  </span>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {isAdmin && (
+            <div className="mb-4 flex justify-between items-center bg-muted/30 p-4 rounded-lg border">
+              <span className="text-sm font-medium">إدارة حالات الطلبات</span>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => queryClient.invalidateQueries({ queryKey: ["/api/orders"] })}
+              >
+                تحديث البيانات
+              </Button>
+            </div>
+          )}
+
           {ordersLoading ? (
             <div className="flex justify-center py-12">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -327,6 +392,42 @@ export default function DashboardPage() {
                     <Badge variant="secondary" className={`${getStatusColor(order.status)} border-0`}>
                       {getStatusText(order.status)}
                     </Badge>
+                    {isAdmin && (
+                      <div className="flex gap-1 mr-2" dir="ltr">
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="h-7 text-[10px] px-2 bg-yellow-100 hover:bg-yellow-200 text-yellow-800"
+                          onClick={() => updateOrderStatusMutation.mutate({ id: order.id, status: 'processing' })}
+                        >
+                          معالجة
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="h-7 text-[10px] px-2 bg-blue-100 hover:bg-blue-200 text-blue-800"
+                          onClick={() => updateOrderStatusMutation.mutate({ id: order.id, status: 'shipped' })}
+                        >
+                          شحن
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="h-7 text-[10px] px-2 bg-green-100 hover:bg-green-200 text-green-800"
+                          onClick={() => updateOrderStatusMutation.mutate({ id: order.id, status: 'delivered' })}
+                        >
+                          توصيل
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="h-7 text-[10px] px-2 bg-red-100 hover:bg-red-200 text-red-800"
+                          onClick={() => updateOrderStatusMutation.mutate({ id: order.id, status: 'cancelled' })}
+                        >
+                          إلغاء
+                        </Button>
+                      </div>
+                    )}
                   </CardHeader>
                   <CardContent className="p-6">
                     <div className="flex flex-col md:flex-row justify-between gap-6">

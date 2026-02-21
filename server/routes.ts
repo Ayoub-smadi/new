@@ -107,9 +107,17 @@ export async function registerRoutes(
     res.json(orders);
   });
 
-  app.get(api.orders.get.path, isAuthenticated, async (req, res) => {
-    const order = await storage.getOrder(req.params.id);
+  app.get(api.orders.get.path, isAuthenticated, async (req: any, res) => {
+    const order = await storage.getOrder(req.params.id as string);
     if (!order) return res.status(404).json({ message: "Order not found" });
+    
+    const userId = req.user.claims.sub;
+    const user = await storage.getUser(userId);
+    const isAdmin = user?.role === 'admin' || user?.firstName === 'Ayoub';
+    
+    if (order.userId !== userId && !isAdmin) {
+      return res.status(403).json({ message: "Forbidden" });
+    }
     res.json(order);
   });
 
