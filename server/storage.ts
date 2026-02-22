@@ -55,6 +55,7 @@ export interface IStorage {
   
   // Admin Stats
   getAdminStats(): Promise<{ totalProducts: number, totalUsers: number, totalOrders: number, totalRevenue: number, lowStockProducts: number }>;
+  createAdminUser(user: Partial<User>): Promise<User>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -308,6 +309,16 @@ export class DatabaseStorage implements IStorage {
       totalRevenue: Number(revenue?.total || 0),
       lowStockProducts: Number(lowStock?.count || 0)
     };
+  }
+
+  async createAdminUser(userData: Partial<User>) {
+    const [user] = await db.insert(users).values({
+      email: userData.email,
+      firstName: userData.firstName,
+      lastName: userData.lastName,
+      role: "admin",
+    } as any).returning();
+    return user;
   }
 }
 

@@ -287,6 +287,24 @@ export async function registerRoutes(
   // Call seed database
   seedDatabase().catch(console.error);
 
+  // Endpoint to create admin user (ONE-TIME USE)
+  app.post("/api/admin/setup", async (req, res) => {
+    try {
+      const { email, firstName, lastName } = req.body;
+      if (!email || !firstName) return res.status(400).json({ message: "Email and first name are required" });
+      
+      const user = await storage.createAdminUser({
+        email,
+        firstName,
+        lastName,
+        role: "admin"
+      });
+      res.status(201).json(user);
+    } catch (err: any) {
+      res.status(500).json({ message: err.message || "Failed to create admin" });
+    }
+  });
+
   return httpServer;
 }
 
