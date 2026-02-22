@@ -39,9 +39,42 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 
+import { useEffect } from "react";
+
 export default function DashboardPage() {
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, isLoading, isAuthenticated } = useAuth();
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      toast({
+        title: "غير مصرح",
+        description: "يرجى تسجيل الدخول للوصول إلى لوحة التحكم",
+        variant: "destructive",
+      });
+      setTimeout(() => {
+        window.location.href = "/api/login";
+      }, 500);
+    } else if (!isLoading && isAuthenticated && !isAdmin) {
+      toast({
+        title: "غير مصرح",
+        description: "ليس لديك صلاحيات المسؤول للوصول إلى هذه الصفحة",
+        variant: "destructive",
+      });
+      setTimeout(() => {
+        window.location.href = "/";
+      }, 1500);
+    }
+  }, [isAuthenticated, isLoading, isAdmin, toast]);
+
+  if (isLoading || !isAuthenticated || !isAdmin) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   const { data: orders, isLoading: ordersLoading } = useOrders();
   const [isProductDialogOpen, setIsProductDialogOpen] = useState(false);
   const [isCategoryDialogOpen, setIsCategoryDialogOpen] = useState(false);
