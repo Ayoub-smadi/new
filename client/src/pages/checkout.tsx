@@ -12,6 +12,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useLocation } from "wouter";
 import { Loader2, CreditCard, Banknote } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const checkoutSchema = z.object({
   shippingAddress: z.string().min(10, "العنوان يجب أن يكون واضحاً ومفصلاً"),
