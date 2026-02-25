@@ -596,6 +596,43 @@ export default function DashboardPage() {
                                 }}
                               />
                               <div className="flex flex-wrap gap-2">
+                                {field.value?.map((url, idx) => (
+                                  <div key={idx} className="relative group">
+                                    <img src={url} className="w-16 h-16 object-cover rounded" />
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        const newUrls = [...field.value];
+                                        newUrls.splice(idx, 1);
+                                        field.onChange(newUrls);
+                                      }}
+                                      className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                                    >
+                                      <Trash2 className="h-3 w-3" />
+                                    </button>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <Button type="submit" className="w-full" disabled={nurseryMutation.isPending}>
+                      {nurseryMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "إضافة نبتة"}
+                    </Button>
+                  </form>
+                </Form>
+                                    if (res.ok) {
+                                      const data = await res.json();
+                                      urls.push(data.url);
+                                    }
+                                  }
+                                  field.onChange(urls);
+                                }}
+                              />
+                              <div className="flex flex-wrap gap-2">
                                 {field.value?.map((url, i) => (
                                   <img key={i} src={url} className="w-12 h-12 object-cover rounded" />
                                 ))}
