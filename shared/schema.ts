@@ -74,6 +74,7 @@ export const nurseryGallery = pgTable("nursery_gallery", {
   title: text("title").notNull(),
   description: text("description"),
   imageUrl: text("image_url").notNull(),
+  additionalImages: text("additional_images").array(),
   type: text("type").notNull(), // 'plant' or 'branch'
   createdAt: timestamp("created_at").defaultNow(),
 });
@@ -169,7 +170,9 @@ export const insertProductSchema = createInsertSchema(products, {
 export const insertOrderSchema = createInsertSchema(orders).omit({ id: true, createdAt: true });
 export const insertOrderItemSchema = createInsertSchema(orderItems).omit({ id: true });
 export const insertReviewSchema = createInsertSchema(reviews).omit({ id: true, createdAt: true });
-export const insertNurseryGallerySchema = createInsertSchema(nurseryGallery).omit({ id: true, createdAt: true });
+export const insertNurseryGallerySchema = createInsertSchema(nurseryGallery, {
+  additionalImages: z.array(z.string()).optional(),
+}).omit({ id: true, createdAt: true });
 export const insertBranchSchema = createInsertSchema(branches).omit({ id: true, createdAt: true });
 export const insertShippingRateSchema = createInsertSchema(shippingRates).omit({ id: true, createdAt: true });
 

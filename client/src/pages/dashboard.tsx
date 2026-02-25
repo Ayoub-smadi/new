@@ -136,7 +136,43 @@ export default function DashboardPage() {
     },
   });
 
-  const [selectedCategoryIdForSub, setSelectedCategoryIdForSub] = useState<string>("");
+  const [isNurseryDialogOpen, setIsNurseryDialogOpen] = useState(false);
+  const nurseryForm = useForm({
+    resolver: zodResolver(insertNurseryGallerySchema),
+    defaultValues: {
+      title: "",
+      description: "",
+      imageUrl: "",
+      additionalImages: [] as string[],
+      type: "plant",
+    },
+  });
+
+  const nurseryMutation = useMutation({
+    mutationFn: async (data: any) => {
+      return await apiRequest("POST", "/api/nursery", data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/nursery"] });
+      setIsNurseryDialogOpen(false);
+      nurseryForm.reset();
+      toast({ title: "تم إضافة النبتة بنجاح" });
+    },
+  });
+
+  const { data: nurseryItems } = useQuery<NurseryGallery[]>({
+    queryKey: ["/api/nursery"],
+  });
+
+  const deleteNurseryMutation = useMutation({
+    mutationFn: async (id: string) => {
+      await apiRequest("DELETE", `/api/nursery/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/nursery"] });
+      toast({ title: "تم حذف النبتة بنجاح" });
+    },
+  });
   const [isSubCategoryDialogOpen, setIsSubCategoryDialogOpen] = useState(false);
 
   const { data: subCategories } = useQuery<SubCategory[]>({
@@ -445,7 +481,136 @@ export default function DashboardPage() {
                 </div>
               </DialogContent>
             </Dialog>
-            <Dialog open={isCategoryDialogOpen} onOpenChange={setIsCategoryDialogOpen}>
+            <Dialog open={isNurseryDialogOpen} onOpenChange={setIsNurseryDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="gap-2">
+                  <Plus className="h-4 w-4" /> إضافة للمشتل
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-md">
+                <DialogHeader>
+                  <DialogTitle>إضافة نبتة جديدة للمشتل</DialogTitle>
+                </DialogHeader>
+                <Form {...nurseryForm}>
+                  <form onSubmit={nurseryForm.handleSubmit((data) => nurseryMutation.mutate(data))} className="space-y-4 text-right">
+                    <FormField
+                      control={nurseryForm.control}
+                      name="title"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>اسم النبتة</FormLabel>
+                          <FormControl><Input {...field} /></FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={nurseryForm.control}
+                      name="description"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>الوصف</FormLabel>
+                          <FormControl><Textarea {...field} /></FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={nurseryForm.control}
+                      name="type"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>النوع</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="اختر النوع" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="plant">نبتة</SelectItem>
+                              <SelectItem value="branch">فرع</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={nurseryForm.control}
+                      name="imageUrl"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>الصورة الرئيسية</FormLabel>
+                          <FormControl>
+                            <div className="space-y-2">
+                              <Input 
+                                type="file" 
+                                accept="image/*"
+                                onChange={async (e) => {
+                                  const file = e.target.files?.[0];
+                                  if (file) {
+                                    const formData = new FormData();
+                                    formData.append("file", file);
+                                    const res = await fetch("/api/upload", { method: "POST", body: formData });
+                                    if (res.ok) {
+                                      const data = await res.json();
+                                      field.onChange(data.url);
+                                    }
+                                  }
+                                }}
+                              />
+                              {field.value && <img src={field.value} className="w-20 h-20 object-cover rounded" />}
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={nurseryForm.control}
+                      name="additionalImages"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>صور إضافية</FormLabel>
+                          <FormControl>
+                            <div className="space-y-2">
+                              <Input 
+                                type="file" 
+                                accept="image/*"
+                                multiple
+                                onChange={async (e) => {
+                                  const files = Array.from(e.target.files || []);
+                                  const urls = [...(field.value || [])];
+                                  for (const file of files) {
+                                    const formData = new FormData();
+                                    formData.append("file", file);
+                                    const res = await fetch("/api/upload", { method: "POST", body: formData });
+                                    if (res.ok) {
+                                      const data = await res.json();
+                                      urls.push(data.url);
+                                    }
+                                  }
+                                  field.onChange(urls);
+                                }}
+                              />
+                              <div className="flex flex-wrap gap-2">
+                                {field.value?.map((url, i) => (
+                                  <img key={i} src={url} className="w-12 h-12 object-cover rounded" />
+                                ))}
+                              </div>
+                            </div>
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    <Button type="submit" className="w-full" disabled={nurseryMutation.isPending}>
+                      {nurseryMutation.isPending ? <Loader2 className="animate-spin" /> : "إضافة للمشتل"}
+                    </Button>
+                  </form>
+                </Form>
+              </DialogContent>
+            </Dialog>
               <DialogTrigger asChild>
                 <Button variant="outline" className="gap-2">
                   <Plus className="h-4 w-4" /> إضافة تصنيف
