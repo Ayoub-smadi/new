@@ -63,11 +63,11 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  await registerRoutes(httpServer, app);
-
-  // IMPORTANT: Setup auth before other routes in index.ts
+  // IMPORTANT: Setup auth before other routes
   await setupAuth(app);
   registerAuthRoutes(app);
+
+  await registerRoutes(httpServer, app);
 
   app.use((err: any, _req: Request, res: Response, next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
