@@ -332,8 +332,22 @@ export async function seedDatabase() {
     await storage.createShippingRate({ region: "الوسط", governorates: "البلقاء، الزرقاء، مادبا", rate: "4.00" });
     await storage.createShippingRate({ region: "الجنوب والأغوار", governorates: "الكرك، الطفيلة، معان، العقبة، الأغوار", rate: "5.00" });
   }
-  // Check if "مروج الخضراء" exists and delete it if requested (though we handle it via API usually)
-  // For the prompt "احذف هاي ومروج الخضراء", I'll also ensure it's not in the seed if it's a fresh start
+
+  // Ensure "بذور" category exists
+  let seedsCategory = cats.find(c => c.name === "بذور");
+  if (!seedsCategory) {
+    seedsCategory = await storage.createCategory({
+      name: "بذور",
+      description: "بذور زراعية متنوعة عالية الجودة",
+      imageUrl: "https://images.unsplash.com/photo-1523348837708-15d4a09cfac2"
+    });
+  }
+
+  // If no products in "بذور" category, we could seed them here, 
+  // but since we already ran the script and Replit DB is persistent, 
+  // they are already there. To make it "permanent" even on new deploys,
+  // we could keep the script or a JSON version.
+  
   if (cats.length === 0) {
     const c1 = await storage.createCategory({ name: "مشاتل القادري", description: "نباتات للزينة الداخلية والخارجية", imageUrl: "https://images.unsplash.com/photo-1416879598555-22442b083d03" });
     const c3 = await storage.createCategory({ name: "أدوات زراعية", description: "معدات وأدوات للزراعة", imageUrl: "https://images.unsplash.com/photo-1416879598555-22442b083d03" });
