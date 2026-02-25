@@ -7,7 +7,7 @@ import { Loader2, Package, Clock, CheckCircle, Plus, Edit, Trash2, LayoutDashboa
 import { format } from "date-fns";
 import { ar } from "date-fns/locale";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Product, Category, SubCategory, ShippingRate, insertProductSchema, insertCategorySchema, insertSubCategorySchema, insertShippingRateSchema } from "@shared/schema";
+import { Product, Category, SubCategory, ShippingRate, NurseryGallery, insertProductSchema, insertCategorySchema, insertSubCategorySchema, insertShippingRateSchema, insertNurseryGallerySchema } from "@shared/schema";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { api } from "@shared/routes";
@@ -175,6 +175,7 @@ export default function DashboardPage() {
   });
   const [isSubCategoryDialogOpen, setIsSubCategoryDialogOpen] = useState(false);
 
+  const [selectedCategoryIdForSub, setSelectedCategoryIdForSub] = useState<string>("");
   const { data: subCategories } = useQuery<SubCategory[]>({
     queryKey: [selectedCategoryIdForSub ? `/api/categories/${selectedCategoryIdForSub}/sub-categories` : "/api/sub-categories"],
     enabled: !!selectedCategoryIdForSub || isProductDialogOpen,
