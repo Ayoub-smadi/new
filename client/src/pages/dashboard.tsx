@@ -687,7 +687,7 @@ export default function DashboardPage() {
                           <span className="font-medium">{product.name}</span>
                         </td>
                         <td className="p-4">{categories?.find(c => c.id === product.categoryId)?.name}</td>
-                        <td className="p-4 font-mono">{product.price} ر.س</td>
+                        <td className="p-4 font-mono">{product.price} د.أ</td>
                         <td className="p-4">
                           <Badge variant={product.stock < 10 ? "destructive" : "secondary"}>
                             {product.stock}
@@ -834,7 +834,7 @@ export default function DashboardPage() {
                               <p className="font-medium text-sm">{item.product?.name}</p>
                               <p className="text-xs text-muted-foreground">الكمية: {item.quantity}</p>
                             </div>
-                            <p className="font-medium text-sm">{(Number(item.priceAtTime) * item.quantity).toFixed(2)} ر.س</p>
+                            <p className="font-medium text-sm">{(Number(item.priceAtTime) * item.quantity).toFixed(2)} د.أ</p>
                           </div>
                         ))}
                       </div>
@@ -845,7 +845,7 @@ export default function DashboardPage() {
                          </div>
                          <div>
                            <span className="text-xs text-muted-foreground block">الإجمالي</span>
-                           <p className="text-lg font-bold text-primary">{order.totalAmount} ر.س</p>
+                           <p className="text-lg font-bold text-primary">{order.totalAmount} د.أ</p>
                          </div>
                       </div>
                     </div>

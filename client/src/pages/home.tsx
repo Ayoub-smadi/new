@@ -159,9 +159,9 @@ export default function Home() {
                     </div>
                     <h3 className="font-bold text-lg mb-2 line-clamp-1">{product.name}</h3>
                     <div className="flex items-baseline gap-2">
-                      <span className="text-xl font-bold text-primary">{product.discountPrice || product.price} ر.س</span>
+                      <span className="text-xl font-bold text-primary">{product.discountPrice || product.price} د.أ</span>
                       {product.discountPrice && (
-                        <span className="text-sm text-muted-foreground line-through">{product.price} ر.س</span>
+                        <span className="text-sm text-muted-foreground line-through">{product.price} د.أ</span>
                       )}
                     </div>
                   </CardContent>

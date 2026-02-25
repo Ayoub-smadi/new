@@ -230,7 +230,7 @@ export default function ProductsPage() {
                     </Link>
                     <div className="flex items-baseline gap-2 mt-auto">
                       <span className="text-xl font-bold text-primary">
-                        {product.discountPrice || product.price} <span className="text-xs font-normal text-muted-foreground">ر.س</span>
+                        {product.discountPrice || product.price} <span className="text-xs font-normal text-muted-foreground">د.أ</span>
                       </span>
                       {product.discountPrice && (
                         <span className="text-sm text-muted-foreground line-through decoration-destructive/50">

@@ -88,7 +88,7 @@ export default function CartPage() {
                     </div>
                     
                     <div className="font-bold text-lg text-primary">
-                      {(parseFloat(price) * quantity).toFixed(2)} ر.س
+                      {(parseFloat(price) * quantity).toFixed(2)} د.أ
                     </div>
                   </div>
                 </div>
@@ -109,16 +109,16 @@ export default function CartPage() {
             <div className="space-y-3 mb-6">
               <div className="flex justify-between text-muted-foreground">
                 <span>المجموع الفرعي</span>
-                <span>{total.toFixed(2)} ر.س</span>
+                <span>{total.toFixed(2)} د.أ</span>
               </div>
               <div className="flex justify-between text-muted-foreground">
                 <span>الشحن</span>
-                <span>25.00 ر.س</span>
+                <span>2.00 د.أ</span>
               </div>
               <div className="h-px bg-border my-2" />
               <div className="flex justify-between font-bold text-lg">
                 <span>الإجمالي</span>
-                <span className="text-primary">{(total + 25).toFixed(2)} ر.س</span>
+                <span className="text-primary">{(total + 2).toFixed(2)} د.أ</span>
               </div>
             </div>
 

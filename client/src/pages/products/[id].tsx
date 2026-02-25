@@ -70,10 +70,10 @@ export default function ProductDetailPage() {
             </div>
 
             <div className="flex items-baseline gap-3 mb-8">
-              <span className="text-4xl font-bold text-primary">{price} <span className="text-lg">ر.س</span></span>
+              <span className="text-4xl font-bold text-primary">{price} <span className="text-lg">د.أ</span></span>
               {originalPrice && (
                 <span className="text-xl text-muted-foreground line-through decoration-destructive/40">
-                  {originalPrice} ر.س
+                  {originalPrice} د.أ
                 </span>
               )}
             </div>

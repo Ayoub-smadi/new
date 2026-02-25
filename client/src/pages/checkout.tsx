@@ -185,15 +185,15 @@ export default function CheckoutPage() {
             <div className="space-y-3 pt-6 border-t border-dashed border-gray-300">
               <div className="flex justify-between text-muted-foreground">
                 <span>المجموع</span>
-                <span>{total.toFixed(2)} ر.س</span>
+                <span>{total.toFixed(2)} د.أ</span>
               </div>
               <div className="flex justify-between text-muted-foreground">
                 <span>الشحن</span>
-                <span>25.00 ر.س</span>
+                <span>2.00 د.أ</span>
               </div>
               <div className="flex justify-between font-bold text-xl pt-2 border-t mt-2">
                 <span>الإجمالي النهائي</span>
-                <span className="text-primary">{(total + 25).toFixed(2)} ر.س</span>
+                <span className="text-primary">{(total + 2).toFixed(2)} د.أ</span>
               </div>
             </div>
           </div>
