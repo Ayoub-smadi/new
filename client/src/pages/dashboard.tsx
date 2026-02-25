@@ -624,29 +624,6 @@ export default function DashboardPage() {
                     </Button>
                   </form>
                 </Form>
-                                    if (res.ok) {
-                                      const data = await res.json();
-                                      urls.push(data.url);
-                                    }
-                                  }
-                                  field.onChange(urls);
-                                }}
-                              />
-                              <div className="flex flex-wrap gap-2">
-                                {field.value?.map((url, i) => (
-                                  <img key={i} src={url} className="w-12 h-12 object-cover rounded" />
-                                ))}
-                              </div>
-                            </div>
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-                    <Button type="submit" className="w-full" disabled={nurseryMutation.isPending}>
-                      {nurseryMutation.isPending ? <Loader2 className="animate-spin" /> : "إضافة للمشتل"}
-                    </Button>
-                  </form>
-                </Form>
               </DialogContent>
             </Dialog>
             <Dialog>
