@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { CartProvider } from "@/components/cart-provider";
 import { Layout } from "@/components/layout";
+import { ThemeProvider } from "@/hooks/use-theme";
 import { useAuth } from "@/hooks/use-auth";
 import { Loader2 } from "lucide-react";
 
@@ -62,12 +63,14 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <CartProvider>
-          <Toaster />
-          <Router />
-        </CartProvider>
-      </TooltipProvider>
+      <ThemeProvider defaultTheme="light" storageKey="murooj-theme">
+        <TooltipProvider>
+          <CartProvider>
+            <Toaster />
+            <Router />
+          </CartProvider>
+        </TooltipProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }
