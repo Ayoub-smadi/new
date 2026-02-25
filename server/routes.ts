@@ -83,7 +83,7 @@ export async function registerRoutes(
     res.json(subs);
   });
 
-  app.post(api.categories.createSubCategory.path, isAuthenticated, isAdminMiddleware, async (req: Request, res) => {
+  app.post("/api/categories/:id/sub-categories", isAuthenticated, isAdminMiddleware, async (req: Request, res) => {
     try {
       const id = req.params.id;
       if (typeof id !== 'string') {
@@ -100,6 +100,75 @@ export async function registerRoutes(
         return res.status(400).json({ message: err.errors[0].message });
       }
       res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.post("/api/admin/import-csv", isAuthenticated, isAdminMiddleware, async (req, res) => {
+    try {
+      const { categoryName, csvData } = req.body;
+      if (!categoryName || !csvData) {
+        return res.status(400).json({ message: "Category name and CSV data are required" });
+      }
+
+      const cats = await storage.getCategories();
+      let category = cats.find(c => c.name === categoryName);
+      if (!category) {
+        category = await storage.createCategory({
+          name: categoryName,
+          description: `تصنيف تم استيراده: ${categoryName}`,
+          imageUrl: "https://images.unsplash.com/photo-1523348837708-15d4a09cfac2"
+        });
+      }
+
+      const lines = csvData.split("\n").filter((line: string) => line.trim() !== "");
+      const dataLines = lines.slice(1); // Skip header
+
+      const subCategoriesMap = new Map();
+      const existingSubCats = await storage.getSubCategories(category.id);
+      existingSubCats.forEach(s => subCategoriesMap.set(s.name, s.id));
+
+      let importedCount = 0;
+
+      for (const line of dataLines) {
+        const parts = line.split(",");
+        if (parts.length < 4) continue;
+
+        const name = parts[0].trim();
+        const subCatName = parts[1].trim();
+        const priceStr = parts[2].trim();
+        const stockStr = parts[3].trim();
+
+        let subCatId = subCategoriesMap.get(subCatName);
+        if (!subCatId) {
+          const subCat = await storage.createSubCategory({
+            name: subCatName,
+            categoryId: category.id,
+            description: `بذور من فئة ${subCatName}`
+          });
+          subCatId = subCat.id;
+          subCategoriesMap.set(subCatName, subCatId);
+        }
+
+        const stock = parseInt(stockStr) || 10;
+        await storage.createProduct({
+          name: name,
+          categoryId: category.id,
+          subCategoryId: subCatId,
+          description: `بذور ${name} عالية الجودة`,
+          price: priceStr,
+          stock: stock,
+          imageUrl: "https://images.unsplash.com/photo-1523348837708-15d4a09cfac2",
+          isFeatured: false,
+          rating: "0.0",
+          reviewsCount: 0
+        });
+        importedCount++;
+      }
+
+      res.json({ message: `تم استيراد ${importedCount} منتج بنجاح` });
+    } catch (err: any) {
+      console.error("Import error:", err);
+      res.status(500).json({ message: err.message || "فشل عملية الاستيراد" });
     }
   });
 

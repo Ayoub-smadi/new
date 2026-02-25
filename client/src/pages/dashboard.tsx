@@ -37,13 +37,15 @@ import {
 } from "@/components/ui/select";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
+import { useState, useRef } from "react";
 
 import { useEffect } from "react";
 
 export default function DashboardPage() {
   const { user, isAdmin, isLoading, isAuthenticated } = useAuth();
   const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [importing, setImporting] = useState(false);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -299,6 +301,39 @@ export default function DashboardPage() {
     return map[status] || status;
   };
 
+  const handleCsvImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setImporting(true);
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      const text = e.target?.result as string;
+      try {
+        const categoryName = prompt("أدخل اسم التصنيف الرئيسي لهذا الملف (مثال: بذور):", "بذور");
+        if (!categoryName) {
+          setImporting(false);
+          return;
+        }
+
+        const res = await apiRequest("POST", "/api/admin/import-csv", {
+          categoryName,
+          csvData: text
+        });
+        const result = await res.json();
+        toast({ title: "تم الاستيراد بنجاح", description: result.message });
+        queryClient.invalidateQueries({ queryKey: ["/api/products"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/categories"] });
+      } catch (error: any) {
+        toast({ title: "فشل الاستيراد", description: error.message, variant: "destructive" });
+      } finally {
+        setImporting(false);
+        if (fileInputRef.current) fileInputRef.current.value = "";
+      }
+    };
+    reader.readAsText(file);
+  };
+
   return (
     <div className="container px-4 py-8">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
@@ -316,6 +351,22 @@ export default function DashboardPage() {
 
         {isAdmin && (
           <div className="flex flex-wrap gap-2">
+            <input
+              type="file"
+              accept=".csv"
+              className="hidden"
+              ref={fileInputRef}
+              onChange={handleCsvImport}
+            />
+            <Button 
+              variant="outline" 
+              className="gap-2" 
+              onClick={() => fileInputRef.current?.click()}
+              disabled={importing}
+            >
+              {importing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+              استيراد من CSV
+            </Button>
             <Dialog>
               <DialogTrigger asChild>
                 <Button variant="outline" className="gap-2">
