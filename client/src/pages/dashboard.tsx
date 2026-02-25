@@ -7,7 +7,7 @@ import { Loader2, Package, Clock, CheckCircle, Plus, Edit, Trash2, LayoutDashboa
 import { format } from "date-fns";
 import { ar } from "date-fns/locale";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Product, Category, SubCategory, insertProductSchema, insertCategorySchema, insertSubCategorySchema } from "@shared/schema";
+import { Product, Category, SubCategory, ShippingRate, insertProductSchema, insertCategorySchema, insertSubCategorySchema, insertShippingRateSchema } from "@shared/schema";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { api } from "@shared/routes";
@@ -86,6 +86,10 @@ export default function DashboardPage() {
 
   const { data: categories } = useQuery<Category[]>({
     queryKey: ["/api/categories"],
+  });
+
+  const { data: shippingRates } = useQuery<ShippingRate[]>({
+    queryKey: ["/api/shipping-rates"],
   });
 
   const categoryForm = useForm({
@@ -230,6 +234,36 @@ export default function DashboardPage() {
     }
   });
 
+  const shippingRateForm = useForm({
+    resolver: zodResolver(insertShippingRateSchema),
+    defaultValues: {
+      region: "",
+      governorates: "",
+      rate: "0",
+    },
+  });
+
+  const shippingRateMutation = useMutation({
+    mutationFn: async (data: any) => {
+      return await apiRequest("POST", "/api/shipping-rates", data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/shipping-rates"] });
+      shippingRateForm.reset();
+      toast({ title: "تم إضافة سعر الشحن بنجاح" });
+    },
+  });
+
+  const deleteShippingRateMutation = useMutation({
+    mutationFn: async (id: string) => {
+      await apiRequest("DELETE", `/api/shipping-rates/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/shipping-rates"] });
+      toast({ title: "تم حذف سعر الشحن بنجاح" });
+    },
+  });
+
   const onEditProduct = (product: Product) => {
     setEditingProduct(product);
     productForm.reset({
@@ -281,7 +315,82 @@ export default function DashboardPage() {
         </div>
 
         {isAdmin && (
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="gap-2">
+                  <Truck className="h-4 w-4" /> أسعار الشحن
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle>إدارة أسعار الشحن</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-6">
+                  <Form {...shippingRateForm}>
+                    <form onSubmit={shippingRateForm.handleSubmit((data) => shippingRateMutation.mutate(data))} className="grid grid-cols-3 gap-2">
+                      <FormField
+                        control={shippingRateForm.control}
+                        name="region"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl><Input placeholder="المنطقة" {...field} /></FormControl>
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={shippingRateForm.control}
+                        name="governorates"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl><Input placeholder="المحافظات" {...field} /></FormControl>
+                          </FormItem>
+                        )}
+                      />
+                      <div className="flex gap-1">
+                        <FormField
+                          control={shippingRateForm.control}
+                          name="rate"
+                          render={({ field }) => (
+                            <FormItem className="flex-1">
+                              <FormControl><Input type="number" placeholder="السعر" {...field} /></FormControl>
+                            </FormItem>
+                          )}
+                        />
+                        <Button type="submit" size="icon"><Plus className="h-4 w-4" /></Button>
+                      </div>
+                    </form>
+                  </Form>
+
+                  <div className="border rounded-lg">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="bg-muted">
+                          <th className="p-2 text-right">المنطقة</th>
+                          <th className="p-2 text-right">المحافظات</th>
+                          <th className="p-2 text-right">السعر</th>
+                          <th className="p-2"></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {shippingRates?.map((rate) => (
+                          <tr key={rate.id} className="border-t">
+                            <td className="p-2">{rate.region}</td>
+                            <td className="p-2">{rate.governorates}</td>
+                            <td className="p-2">{rate.rate} د.أ</td>
+                            <td className="p-2 text-center">
+                              <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => deleteShippingRateMutation.mutate(rate.id)}>
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
             <Dialog open={isCategoryDialogOpen} onOpenChange={setIsCategoryDialogOpen}>
               <DialogTrigger asChild>
                 <Button variant="outline" className="gap-2">

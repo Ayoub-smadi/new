@@ -43,7 +43,9 @@ export const orders = pgTable("orders", {
   userId: varchar("user_id").notNull().references(() => users.id),
   status: text("status").notNull().default("processing"), // processing, shipped, delivered, cancelled
   totalAmount: numeric("total_amount", { precision: 10, scale: 2 }).notNull(),
+  shippingAmount: numeric("shipping_amount", { precision: 10, scale: 2 }).notNull().default('0'),
   shippingAddress: text("shipping_address").notNull(),
+  regionId: varchar("region_id").references(() => shippingRates.id),
   paymentMethod: text("payment_method").notNull(), // cod, card
   notes: text("notes"),
   createdAt: timestamp("created_at").defaultNow(),
@@ -109,6 +111,10 @@ export const ordersRelations = relations(orders, ({ one, many }) => ({
     fields: [orders.userId],
     references: [users.id],
   }),
+  region: one(shippingRates, {
+    fields: [orders.regionId],
+    references: [shippingRates.id],
+  }),
   items: many(orderItems),
 }));
 
@@ -134,6 +140,14 @@ export const reviewsRelations = relations(reviews, ({ one }) => ({
   }),
 }));
 
+export const shippingRates = pgTable("shipping_rates", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  region: text("region").notNull(),
+  governorates: text("governorates").notNull(),
+  rate: numeric("rate", { precision: 10, scale: 2 }).notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const branches = pgTable("branches", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   name: text("name").notNull(),
@@ -154,6 +168,7 @@ export const insertOrderItemSchema = createInsertSchema(orderItems).omit({ id: t
 export const insertReviewSchema = createInsertSchema(reviews).omit({ id: true, createdAt: true });
 export const insertNurseryGallerySchema = createInsertSchema(nurseryGallery).omit({ id: true, createdAt: true });
 export const insertBranchSchema = createInsertSchema(branches).omit({ id: true, createdAt: true });
+export const insertShippingRateSchema = createInsertSchema(shippingRates).omit({ id: true, createdAt: true });
 
 // Types
 export type Category = typeof categories.$inferSelect;
@@ -172,6 +187,8 @@ export type NurseryGallery = typeof nurseryGallery.$inferSelect;
 export type InsertNurseryGallery = z.infer<typeof insertNurseryGallerySchema>;
 export type Branch = typeof branches.$inferSelect;
 export type InsertBranch = z.infer<typeof insertBranchSchema>;
+export type ShippingRate = typeof shippingRates.$inferSelect;
+export type InsertShippingRate = z.infer<typeof insertShippingRateSchema>;
 
 export type User = typeof users.$inferSelect;
 export type UpsertUser = typeof users.$inferInsert;
@@ -181,6 +198,7 @@ export type CreateOrderRequest = {
   shippingAddress: string;
   paymentMethod: "cod" | "card";
   notes?: string;
+  regionId?: string;
   items: {
     productId: string;
     quantity: number;

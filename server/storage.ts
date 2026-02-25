@@ -9,7 +9,8 @@ import {
   reviews, type Review, type InsertReview,
   users, type User,
   nurseryGallery, type NurseryGallery, type InsertNurseryGallery,
-  branches, type Branch, type InsertBranch
+  branches, type Branch, type InsertBranch,
+  shippingRates, type ShippingRate, type InsertShippingRate
 } from "@shared/schema";
 
 export interface IStorage {
@@ -36,7 +37,7 @@ export interface IStorage {
   // Orders
   getOrders(userId?: string): Promise<(Order & { items: (OrderItem & { product: Product })[] })[]>;
   getOrder(id: string): Promise<(Order & { items: (OrderItem & { product: Product })[] }) | undefined>;
-  createOrder(userId: string, orderData: Omit<InsertOrder, "userId" | "totalAmount" | "status">, items: {productId: string, quantity: number}[]): Promise<Order>;
+  createOrder(userId: string, orderData: Omit<InsertOrder, "userId" | "totalAmount" | "status" | "shippingAmount">, items: {productId: string, quantity: number}[], regionId?: string): Promise<Order>;
   updateOrderStatus(id: string, status: string): Promise<Order | undefined>;
   
   // Reviews
@@ -52,6 +53,12 @@ export interface IStorage {
   getBranches(): Promise<Branch[]>;
   createBranch(branch: InsertBranch): Promise<Branch>;
   deleteBranch(id: string): Promise<void>;
+
+  // Shipping Rates
+  getShippingRates(): Promise<ShippingRate[]>;
+  createShippingRate(rate: InsertShippingRate): Promise<ShippingRate>;
+  updateShippingRate(id: string, rate: Partial<InsertShippingRate>): Promise<ShippingRate | undefined>;
+  deleteShippingRate(id: string): Promise<void>;
   
   // Admin Stats
   getAdminStats(): Promise<{ totalProducts: number, totalUsers: number, totalOrders: number, totalRevenue: number, lowStockProducts: number }>;
@@ -195,7 +202,7 @@ export class DatabaseStorage implements IStorage {
     return order as any;
   }
 
-  async createOrder(userId: string, orderData: Omit<InsertOrder, "userId" | "totalAmount" | "status">, items: {productId: string, quantity: number}[]) {
+  async createOrder(userId: string, orderData: Omit<InsertOrder, "userId" | "totalAmount" | "status" | "shippingAmount">, items: {productId: string, quantity: number}[], regionId?: string) {
     let totalAmount = 0;
     const orderItemsToInsert = [];
 
@@ -220,9 +227,19 @@ export class DatabaseStorage implements IStorage {
         .where(eq(products.id, product.id));
     }
 
+    let shippingAmount = 0;
+    if (regionId) {
+      const [rate] = await db.select().from(shippingRates).where(eq(shippingRates.id, regionId));
+      if (rate) {
+        shippingAmount = Number(rate.rate);
+      }
+    }
+
     const [order] = await db.insert(orders).values({
       ...orderData,
       userId,
+      regionId,
+      shippingAmount: shippingAmount.toString(),
       totalAmount: totalAmount.toString(),
       status: "processing"
     }).returning();
@@ -291,6 +308,24 @@ export class DatabaseStorage implements IStorage {
 
   async deleteBranch(id: string) {
     await db.delete(branches).where(eq(branches.id, id));
+  }
+
+  async getShippingRates() {
+    return await db.select().from(shippingRates);
+  }
+
+  async createShippingRate(rate: InsertShippingRate) {
+    const [res] = await db.insert(shippingRates).values(rate).returning();
+    return res;
+  }
+
+  async updateShippingRate(id: string, updates: Partial<InsertShippingRate>) {
+    const [res] = await db.update(shippingRates).set(updates).where(eq(shippingRates.id, id)).returning();
+    return res;
+  }
+
+  async deleteShippingRate(id: string) {
+    await db.delete(shippingRates).where(eq(shippingRates.id, id));
   }
 
   async getAdminStats() {

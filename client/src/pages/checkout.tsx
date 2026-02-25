@@ -17,6 +17,7 @@ const checkoutSchema = z.object({
   shippingAddress: z.string().min(10, "العنوان يجب أن يكون واضحاً ومفصلاً"),
   paymentMethod: z.enum(["cod", "card"]),
   notes: z.string().optional(),
+  regionId: z.string().min(1, "يرجى اختيار المحافظة"),
 });
 
 type CheckoutFormValues = z.infer<typeof checkoutSchema>;
@@ -27,14 +28,22 @@ export default function CheckoutPage() {
   const { toast } = useToast();
   const [_, setLocation] = useLocation();
 
+  const { data: shippingRates } = useQuery<any[]>({
+    queryKey: ["/api/shipping-rates"],
+  });
+
   const form = useForm<CheckoutFormValues>({
     resolver: zodResolver(checkoutSchema),
     defaultValues: {
       paymentMethod: "cod",
       shippingAddress: "",
-      notes: ""
+      notes: "",
+      regionId: ""
     }
   });
+
+  const selectedRegionId = form.watch("regionId");
+  const shippingAmount = Number(shippingRates?.find(r => r.id === selectedRegionId)?.rate || 0);
 
   if (items.length === 0) {
     setLocation("/cart");
@@ -81,13 +90,38 @@ export default function CheckoutPage() {
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                 <FormField
                   control={form.control}
+                  name="regionId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>المحافظة / المنطقة</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="اختر المحافظة" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {shippingRates?.map((rate) => (
+                            <SelectItem key={rate.id} value={rate.id}>
+                              {rate.governorates} ({rate.rate} د.أ)
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
                   name="shippingAddress"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>عنوان التوصيل</FormLabel>
+                      <FormLabel>عنوان التوصيل بالتفصيل</FormLabel>
                       <FormControl>
                         <Textarea 
-                          placeholder="المدينة، الحي، اسم الشارع، رقم المبنى..." 
+                          placeholder="الحي، اسم الشارع، رقم المبنى، معلم بارز..." 
                           className="min-h-[100px]" 
                           {...field} 
                         />
@@ -189,11 +223,11 @@ export default function CheckoutPage() {
               </div>
               <div className="flex justify-between text-muted-foreground">
                 <span>الشحن</span>
-                <span>2.00 د.أ</span>
+                <span>{shippingAmount.toFixed(2)} د.أ</span>
               </div>
               <div className="flex justify-between font-bold text-xl pt-2 border-t mt-2">
                 <span>الإجمالي النهائي</span>
-                <span className="text-primary">{(total + 2).toFixed(2)} د.أ</span>
+                <span className="text-primary">{(total + shippingAmount).toFixed(2)} د.أ</span>
               </div>
             </div>
           </div>

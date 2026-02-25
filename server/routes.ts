@@ -202,10 +202,11 @@ export async function registerRoutes(
       const orderData = {
         shippingAddress: input.shippingAddress,
         paymentMethod: input.paymentMethod,
-        notes: input.notes
+        notes: input.notes,
+        regionId: req.body.regionId
       };
       
-      const order = await storage.createOrder(userId, orderData, input.items);
+      const order = await storage.createOrder(userId, orderData, input.items, req.body.regionId);
       res.status(201).json(order);
     } catch (err: any) {
       if (err instanceof z.ZodError) {
@@ -285,6 +286,35 @@ export async function registerRoutes(
     res.status(204).end();
   });
 
+  // SHIPPING RATES
+  app.get("/api/shipping-rates", async (req, res) => {
+    const rates = await storage.getShippingRates();
+    res.json(rates);
+  });
+
+  app.post("/api/shipping-rates", isAuthenticated, isAdminMiddleware, async (req, res) => {
+    try {
+      const rate = await storage.createShippingRate(req.body);
+      res.status(201).json(rate);
+    } catch (err) {
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.put("/api/shipping-rates/:id", isAuthenticated, isAdminMiddleware, async (req, res) => {
+    try {
+      const rate = await storage.updateShippingRate(req.params.id, req.body);
+      res.json(rate);
+    } catch (err) {
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.delete("/api/shipping-rates/:id", isAuthenticated, isAdminMiddleware, async (req, res) => {
+    await storage.deleteShippingRate(req.params.id);
+    res.status(204).end();
+  });
+
   // Call seed database
   seedDatabase().catch(console.error);
 
@@ -293,6 +323,15 @@ export async function registerRoutes(
 
 export async function seedDatabase() {
   const cats = await storage.getCategories();
+  
+  // Seed shipping rates if empty
+  const rates = await storage.getShippingRates();
+  if (rates.length === 0) {
+    await storage.createShippingRate({ region: "الشمال", governorates: "جرش، عجلون، إربد، المفرق", rate: "3.00" });
+    await storage.createShippingRate({ region: "عمان", governorates: "عمان", rate: "3.00" });
+    await storage.createShippingRate({ region: "الوسط", governorates: "البلقاء، الزرقاء، مادبا", rate: "4.00" });
+    await storage.createShippingRate({ region: "الجنوب والأغوار", governorates: "الكرك، الطفيلة، معان، العقبة، الأغوار", rate: "5.00" });
+  }
   // Check if "مروج الخضراء" exists and delete it if requested (though we handle it via API usually)
   // For the prompt "احذف هاي ومروج الخضراء", I'll also ensure it's not in the seed if it's a fresh start
   if (cats.length === 0) {
