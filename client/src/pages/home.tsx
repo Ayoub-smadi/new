@@ -4,12 +4,15 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "wouter";
-import { ArrowLeft, Star, TrendingUp, ShieldCheck, Truck } from "lucide-react";
+import { ArrowLeft, ArrowRight, Star, TrendingUp, ShieldCheck, Truck } from "lucide-react";
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 
 export default function Home() {
   const { data: featuredProducts, isLoading: productsLoading } = useProducts({ featured: true });
   const { data: categories, isLoading: categoriesLoading } = useCategories();
+  const { t, i18n } = useTranslation();
+  const isRtl = i18n.language === 'ar';
 
   return (
     <div className="flex flex-col gap-12 pb-12">
@@ -33,23 +36,23 @@ export default function Home() {
             className="max-w-3xl mx-auto space-y-6"
           >
             <Badge variant="outline" className="bg-white/10 backdrop-blur border-white/20 text-white px-4 py-1 text-sm">
-              موسم الزراعة الجديد
+              {t('hero.badge')}
             </Badge>
             <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight drop-shadow-lg">
-              ازرع مستقبلك مع <span className="text-accent">مشاتل القادري</span>
+              {t('hero.title')} <span className="text-accent">{t('hero.brand')}</span>
             </h1>
             <p className="text-lg md:text-xl text-white/90 leading-relaxed drop-shadow-md max-w-2xl mx-auto">
-              نوفر لك في مشاتل القادري أفضل البذور والأسمدة والمعدات الزراعية لتضمن محصولاً وفيراً وجودة عالية.
+              {t('hero.subtitle')}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
               <Link href="/products">
                 <Button size="lg" className="bg-accent hover:bg-accent/90 text-white border-0 text-lg px-8 py-6 h-auto">
-                  تسوق الآن <ArrowLeft className="mr-2 h-5 w-5" />
+                  {t('hero.shop_now')} {isRtl ? <ArrowLeft className="mr-2 h-5 w-5" /> : <ArrowRight className="ml-2 h-5 w-5" />}
                 </Button>
               </Link>
               <Link href="/about">
                 <Button size="lg" variant="outline" className="bg-white/10 backdrop-blur hover:bg-white/20 border-white text-white text-lg px-8 py-6 h-auto">
-                  تعرف علينا
+                  {t('hero.learn_more')}
                 </Button>
               </Link>
             </div>
@@ -61,9 +64,9 @@ export default function Home() {
       <section className="container px-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {[
-            { icon: ShieldCheck, title: "جودة مضمونة", desc: "منتجات أصلية 100% من أفضل العلامات التجارية العالمية" },
-            { icon: Truck, title: "توصيل سريع", desc: "خدمة توصيل سريعة وموثوقة لجميع مناطق المملكة" },
-            { icon: TrendingUp, title: "أسعار تنافسية", desc: "أفضل الأسعار في السوق مع عروض موسمية مستمرة" },
+            { icon: ShieldCheck, title: t('features.quality'), desc: t('features.quality_desc') },
+            { icon: Truck, title: t('features.delivery'), desc: t('features.delivery_desc') },
+            { icon: TrendingUp, title: t('features.price'), desc: t('features.price_desc') },
           ].map((feature, i) => (
             <motion.div 
               key={i}
@@ -86,9 +89,9 @@ export default function Home() {
       {/* Categories */}
       <section className="container px-4">
         <div className="flex items-center justify-between mb-8">
-          <h2 className="text-3xl font-bold">الأقسام الرئيسية</h2>
+          <h2 className="text-3xl font-bold">{t('sections.categories')}</h2>
           <Link href="/products">
-            <Button variant="ghost" className="text-primary hover:text-primary/80">عرض الكل</Button>
+            <Button variant="ghost" className="text-primary hover:text-primary/80">{t('sections.view_all')}</Button>
           </Link>
         </div>
         
@@ -109,7 +112,7 @@ export default function Home() {
                     alt={category.name}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex items-end p-6">
+                  <div className={`absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex items-end p-6 ${isRtl ? 'text-right' : 'text-left'}`}>
                     <h3 className="text-white font-bold text-xl">{category.name}</h3>
                   </div>
                 </motion.div>
@@ -122,9 +125,9 @@ export default function Home() {
       {/* Featured Products */}
       <section className="container px-4 bg-secondary/30 py-16 rounded-3xl">
         <div className="flex items-center justify-between mb-8">
-          <h2 className="text-3xl font-bold text-primary">منتجات مميزة</h2>
+          <h2 className="text-3xl font-bold text-primary">{t('sections.featured')}</h2>
           <Link href="/products?featured=true">
-            <Button variant="outline" className="border-primary text-primary hover:bg-primary hover:text-white">تصفح المميز</Button>
+            <Button variant="outline" className="border-primary text-primary hover:bg-primary hover:text-white">{t('sections.browse_featured')}</Button>
           </Link>
         </div>
 
@@ -144,8 +147,8 @@ export default function Home() {
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
                     {product.discountPrice && (
-                      <Badge className="absolute top-2 right-2 bg-destructive text-white">
-                        خصم {Math.round(((Number(product.price) - Number(product.discountPrice)) / Number(product.price)) * 100)}%
+                      <Badge className={`absolute top-2 ${isRtl ? 'right-2' : 'left-2'} bg-destructive text-white`}>
+                        {isRtl ? 'خصم' : 'Discount'} {Math.round(((Number(product.price) - Number(product.discountPrice)) / Number(product.price)) * 100)}%
                       </Badge>
                     )}
                   </div>
@@ -153,15 +156,15 @@ export default function Home() {
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-xs text-muted-foreground">{product.category.name}</span>
                       <div className="flex items-center text-yellow-500 text-xs">
-                        <Star className="w-3 h-3 fill-current mr-1" />
+                        <Star className={`w-3 h-3 fill-current ${isRtl ? 'mr-1' : 'ml-1'}`} />
                         <span>{product.rating}</span>
                       </div>
                     </div>
                     <h3 className="font-bold text-lg mb-2 line-clamp-1">{product.name}</h3>
                     <div className="flex items-baseline gap-2">
-                      <span className="text-xl font-bold text-primary">{product.discountPrice || product.price} د.أ</span>
+                      <span className="text-xl font-bold text-primary">{product.discountPrice || product.price} {isRtl ? 'د.أ' : 'JOD'}</span>
                       {product.discountPrice && (
-                        <span className="text-sm text-muted-foreground line-through">{product.price} د.أ</span>
+                        <span className="text-sm text-muted-foreground line-through">{product.price} {isRtl ? 'د.أ' : 'JOD'}</span>
                       )}
                     </div>
                   </CardContent>
@@ -179,13 +182,13 @@ export default function Home() {
           <div className="absolute bottom-0 left-0 w-64 h-64 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/2 blur-3xl" />
           
           <div className="relative z-10 max-w-2xl mx-auto space-y-6">
-            <h2 className="text-3xl md:text-4xl font-bold">تسوق أفضل المنتجات الزراعية الآن</h2>
+            <h2 className="text-3xl md:text-4xl font-bold">{isRtl ? 'تسوق أفضل المنتجات الزراعية الآن' : 'Shop the best agricultural products now'}</h2>
             <p className="text-primary-foreground/80 text-lg">
-              كل ما تحتاجه لزراعتك ومنزلك في مكان واحد. جودة عالية وأسعار منافسة.
+              {isRtl ? 'كل ما تحتاجه لزراعتك ومنزلك في مكان واحد. جودة عالية وأسعار منافسة.' : 'Everything you need for your farm and home in one place. High quality and competitive prices.'}
             </p>
             <Link href="/products">
               <Button size="lg" variant="secondary" className="text-primary font-bold text-lg px-8">
-                الذهاب للمتجر
+                {isRtl ? 'الذهاب للمتجر' : 'Go to Shop'}
               </Button>
             </Link>
           </div>
