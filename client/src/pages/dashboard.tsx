@@ -190,6 +190,7 @@ export default function DashboardPage() {
       categoryId: "",
       subCategoryId: "",
       imageUrl: "",
+      additionalImages: [] as string[],
       stock: 0,
       isFeatured: false,
     },
@@ -203,6 +204,7 @@ export default function DashboardPage() {
         discountPrice: (data.discountPrice && data.discountPrice !== "") ? data.discountPrice.toString() : null,
         stock: parseInt(data.stock.toString()) || 0,
         subCategoryId: (data.subCategoryId === "none" || !data.subCategoryId) ? null : data.subCategoryId,
+        additionalImages: data.additionalImages || [],
       };
       console.log("Sending formatted data:", formattedData);
       if (editingProduct) {
@@ -275,6 +277,7 @@ export default function DashboardPage() {
       discountPrice: product.discountPrice || "",
       categoryId: product.categoryId,
       imageUrl: product.imageUrl,
+      additionalImages: (product as any).additionalImages || [],
       stock: product.stock,
       isFeatured: product.isFeatured || false,
     });
@@ -710,7 +713,7 @@ export default function DashboardPage() {
                       name="imageUrl"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>صورة المنتج</FormLabel>
+                          <FormLabel>رابط الصورة الأساسية</FormLabel>
                           <FormControl>
                             <div className="space-y-2">
                               <Input 
@@ -745,6 +748,73 @@ export default function DashboardPage() {
                                 </div>
                               )}
                               <Input {...field} placeholder="أو أدخل رابط الصورة هنا" />
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={productForm.control}
+                      name="additionalImages"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>صور إضافية للمعرض</FormLabel>
+                          <FormControl>
+                            <div className="space-y-4">
+                              <Input 
+                                type="file" 
+                                accept="image/*"
+                                multiple
+                                onChange={async (e) => {
+                                  const files = e.target.files;
+                                  if (files && files.length > 0) {
+                                    const newUrls = [...(field.value || [])];
+                                    for (let i = 0; i < files.length; i++) {
+                                      const formData = new FormData();
+                                      formData.append("file", files[i]);
+                                      try {
+                                        const res = await fetch("/api/upload", {
+                                          method: "POST",
+                                          body: formData,
+                                        });
+                                        if (res.ok) {
+                                          const data = await res.json();
+                                          newUrls.push(data.url);
+                                        }
+                                      } catch (error) {
+                                        console.error("Upload error", error);
+                                      }
+                                    }
+                                    field.onChange(newUrls);
+                                    toast({ title: `تم رفع ${files.length} صور بنجاح` });
+                                  }
+                                }}
+                              />
+                              <div className="grid grid-cols-4 gap-2">
+                                {(field.value || []).map((url: string, index: number) => (
+                                  <div key={index} className="relative aspect-square border rounded overflow-hidden group">
+                                    <img src={url} className="w-full h-full object-cover" />
+                                    <button 
+                                      type="button"
+                                      onClick={() => {
+                                        const newUrls = [...field.value];
+                                        newUrls.splice(index, 1);
+                                        field.onChange(newUrls);
+                                      }}
+                                      className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                                    >
+                                      <Trash2 className="w-4 h-4 text-white" />
+                                    </button>
+                                  </div>
+                                ))}
+                              </div>
+                              <Textarea 
+                                placeholder="أو أدخل روابط الصور مفصولة بأسطر" 
+                                value={(field.value || []).join('\n')}
+                                onChange={(e) => field.onChange(e.target.value.split('\n').filter(l => l.trim()))}
+                              />
                             </div>
                           </FormControl>
                           <FormMessage />

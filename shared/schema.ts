@@ -32,6 +32,7 @@ export const products = pgTable("products", {
   discountPrice: numeric("discount_price", { precision: 10, scale: 2 }),
   stock: integer("stock").notNull().default(0),
   imageUrl: text("image_url").notNull(),
+  additionalImages: text("additional_images").array(),
   isFeatured: boolean("is_featured").default(false),
   rating: numeric("rating", { precision: 2, scale: 1 }).default('0'),
   reviewsCount: integer("reviews_count").default(0),
@@ -162,7 +163,9 @@ export const branchesRelations = relations(branches, ({}) => ({}));
 // Base Schemas
 export const insertCategorySchema = createInsertSchema(categories).omit({ id: true, createdAt: true });
 export const insertSubCategorySchema = createInsertSchema(subCategories).omit({ id: true, createdAt: true });
-export const insertProductSchema = createInsertSchema(products).omit({ id: true, createdAt: true, rating: true, reviewsCount: true });
+export const insertProductSchema = createInsertSchema(products, {
+  additionalImages: z.array(z.string()).optional(),
+}).omit({ id: true, createdAt: true, rating: true, reviewsCount: true });
 export const insertOrderSchema = createInsertSchema(orders).omit({ id: true, createdAt: true });
 export const insertOrderItemSchema = createInsertSchema(orderItems).omit({ id: true });
 export const insertReviewSchema = createInsertSchema(reviews).omit({ id: true, createdAt: true });

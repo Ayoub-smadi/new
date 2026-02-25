@@ -16,11 +16,15 @@ export default function ProductDetailPage() {
   const { addItem } = useCart();
   const [quantity, setQuantity] = useState(1);
 
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+
   if (isLoading) return <ProductSkeleton />;
   if (!product) return <NotFound />;
 
   const price = product.discountPrice || product.price;
   const originalPrice = product.discountPrice ? product.price : null;
+  const allImages = [product.imageUrl, ...((product as any).additionalImages || [])];
+  const currentImage = selectedImage || product.imageUrl;
 
   return (
     <div className="container px-4 py-8">
@@ -29,9 +33,9 @@ export default function ProductDetailPage() {
         <div className="space-y-4">
           <div className="aspect-square bg-muted rounded-2xl overflow-hidden border border-border/50 relative">
              <img 
-               src={product.imageUrl} 
+               src={currentImage} 
                alt={product.name} 
-               className="w-full h-full object-cover"
+               className="w-full h-full object-cover transition-all duration-300"
              />
              {product.discountPrice && (
                <Badge className="absolute top-4 right-4 bg-destructive text-white text-lg px-3 py-1">
@@ -39,6 +43,19 @@ export default function ProductDetailPage() {
                </Badge>
              )}
           </div>
+          {allImages.length > 1 && (
+            <div className="flex gap-2 overflow-x-auto pb-2">
+              {allImages.map((img, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setSelectedImage(img)}
+                  className={`w-20 h-20 rounded-md overflow-hidden border-2 shrink-0 ${currentImage === img ? 'border-primary' : 'border-transparent'}`}
+                >
+                  <img src={img} alt={`${product.name} ${idx + 1}`} className="w-full h-full object-cover" />
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Product Info */}

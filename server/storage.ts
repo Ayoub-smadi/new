@@ -165,7 +165,11 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateProduct(id: string, updates: Partial<InsertProduct>) {
-    const [p] = await db.update(products).set(updates).where(eq(products.id, id)).returning();
+    const [p] = await db.update(products).set({
+      ...updates,
+      price: updates.price?.toString(),
+      discountPrice: updates.discountPrice?.toString(),
+    }).where(eq(products.id, id)).returning();
     return p;
   }
 
