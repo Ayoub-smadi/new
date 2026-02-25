@@ -762,7 +762,7 @@ export default function DashboardPage() {
                         <FormItem>
                           <FormLabel>صور إضافية للمعرض</FormLabel>
                           <FormControl>
-                            <div className="space-y-4">
+                            <div className="space-y-4 text-right">
                               <Input 
                                 type="file" 
                                 accept="image/*"
@@ -810,11 +810,6 @@ export default function DashboardPage() {
                                   </div>
                                 ))}
                               </div>
-                              <Textarea 
-                                placeholder="أو أدخل روابط الصور مفصولة بأسطر" 
-                                value={(field.value || []).join('\n')}
-                                onChange={(e) => field.onChange(e.target.value.split('\n').filter(l => l.trim()))}
-                              />
                             </div>
                           </FormControl>
                           <FormMessage />
