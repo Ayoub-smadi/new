@@ -48,7 +48,12 @@ export async function registerRoutes(
   const isAdminMiddleware: RequestHandler = async (req: any, res, next) => {
     if (!req.isAuthenticated()) return res.status(401).json({ message: "Unauthorized" });
     const user = await storage.getUser(req.user.claims.sub);
-    if (user?.role !== 'admin' && user?.firstName !== 'Ayoub') {
+    const isAdmin = user?.role === 'admin' || 
+                    user?.firstName?.toLowerCase() === 'ayoub' ||
+                    user?.email?.toLowerCase()?.includes('ayoub');
+    
+    if (!isAdmin) {
+      console.log(`Admin access denied for user: ${user?.firstName} ${user?.lastName} (${user?.email})`);
       return res.status(403).json({ message: "Forbidden: Admin access required" });
     }
     next();
