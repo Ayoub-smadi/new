@@ -23,6 +23,14 @@ export default function NurseryPage() {
     queryKey: ["/api/nursery"],
   });
 
+  const [selectedCategory, setSelectedCategory] = useState<string>("الكل");
+
+  const categories = ["الكل", ...Array.from(new Set(items?.map(item => item.category || "عام") || []))];
+
+  const filteredItems = items?.filter(item => 
+    selectedCategory === "الكل" || (item.category || "عام") === selectedCategory
+  );
+
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       await apiRequest("DELETE", `/api/nursery/${id}`);
@@ -82,8 +90,21 @@ export default function NurseryPage() {
         <div className="w-24 h-1.5 bg-primary mx-auto rounded-full mt-6" />
       </motion.div>
 
+      <div className="flex flex-wrap justify-center gap-2 mb-12">
+        {categories.map((cat) => (
+          <Button
+            key={cat}
+            variant={selectedCategory === cat ? "default" : "outline"}
+            onClick={() => setSelectedCategory(cat)}
+            className="rounded-full px-6"
+          >
+            {cat}
+          </Button>
+        ))}
+      </div>
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
-        {items?.map((item, index) => (
+        {filteredItems?.map((item, index) => (
           <motion.div
             key={item.id}
             initial={{ opacity: 0, scale: 0.9 }}

@@ -76,6 +76,7 @@ export const nurseryGallery = pgTable("nursery_gallery", {
   imageUrl: text("image_url").notNull(),
   additionalImages: text("additional_images").array(),
   type: text("type").notNull(), // 'plant' or 'branch'
+  category: text("category").default('عام'),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

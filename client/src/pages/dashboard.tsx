@@ -251,6 +251,7 @@ export default function DashboardPage() {
       imageUrl: "",
       additionalImages: [] as string[],
       type: "plant",
+      category: "عام",
     },
   });
 
@@ -672,38 +673,7 @@ export default function DashboardPage() {
                       name="imageUrl"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>الصورة الرئيسية</FormLabel>
-                          <FormControl>
-                            <div className="space-y-2">
-                              <Input 
-                                type="file" 
-                                accept="image/*"
-                                onChange={async (e) => {
-                                  const file = e.target.files?.[0];
-                                  if (file) {
-                                    const formData = new FormData();
-                                    formData.append("file", file);
-                                    const res = await fetch("/api/upload", { method: "POST", body: formData });
-                                    if (res.ok) {
-                                      const data = await res.json();
-                                      field.onChange(data.url);
-                                    }
-                                  }
-                                }}
-                              />
-                              {field.value && <img src={field.value} className="w-20 h-20 object-cover rounded" />}
-                            </div>
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={nurseryForm.control}
-                      name="additionalImages"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>صور إضافية</FormLabel>
+                          <FormLabel>الصور (يمكن رفع صور متعددة أو وضع روابط مفصولة بفاصلة)</FormLabel>
                           <FormControl>
                             <div className="space-y-2">
                               <Input 
@@ -712,45 +682,57 @@ export default function DashboardPage() {
                                 multiple
                                 onChange={async (e) => {
                                   const files = Array.from(e.target.files || []);
-                                  const urls = [...(field.value || [])];
+                                  const urls = [...(nurseryForm.getValues("additionalImages") || [])];
+                                  let firstUrl = field.value;
+                                  
                                   for (const file of files) {
                                     const formData = new FormData();
                                     formData.append("file", file);
                                     const res = await fetch("/api/upload", { method: "POST", body: formData });
                                     if (res.ok) {
                                       const data = await res.json();
-                                      urls.push(data.url);
+                                      if (!firstUrl) {
+                                        firstUrl = data.url;
+                                      } else {
+                                        urls.push(data.url);
+                                      }
                                     }
                                   }
-                                  field.onChange(urls);
+                                  field.onChange(firstUrl);
+                                  nurseryForm.setValue("additionalImages", urls);
+                                  toast({ title: "تم رفع الصور بنجاح" });
                                 }}
                               />
-                              <div className="flex flex-wrap gap-2">
-                                {field.value?.map((url, idx) => (
-                                  <div key={idx} className="relative group">
-                                    <img src={url} className="w-16 h-16 object-cover rounded" />
-                                    <button
-                                      type="button"
-                                      onClick={() => {
-                                        const newUrls = [...field.value];
-                                        newUrls.splice(idx, 1);
-                                        field.onChange(newUrls);
-                                      }}
-                                      className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
-                                    >
-                                      <Trash2 className="h-3 w-3" />
-                                    </button>
-                                  </div>
-                                ))}
-                              </div>
+                              <Textarea 
+                                placeholder="أو أدخل روابط الصور هنا مفصولة بفاصلة" 
+                                value={field.value + (nurseryForm.getValues("additionalImages")?.length ? "," + nurseryForm.getValues("additionalImages").join(",") : "")}
+                                onChange={(e) => {
+                                  const urls = e.target.value.split(",").map(u => u.trim()).filter(u => u);
+                                  field.onChange(urls[0] || "");
+                                  nurseryForm.setValue("additionalImages", urls.slice(1));
+                                }}
+                              />
                             </div>
                           </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
+                    <FormField
+                      control={nurseryForm.control}
+                      name="category"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>التصنيف</FormLabel>
+                          <FormControl>
+                            <Input placeholder="مثال: أشجار زينة، ورود، إلخ" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                     <Button type="submit" className="w-full" disabled={nurseryMutation.isPending}>
-                      {nurseryMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "إضافة نبتة"}
+                      {nurseryMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "إضافة إلى المعرض"}
                     </Button>
                   </form>
                 </Form>
