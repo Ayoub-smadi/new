@@ -10,7 +10,8 @@ import {
   users, type User,
   nurseryGallery, type NurseryGallery, type InsertNurseryGallery,
   branches, type Branch, type InsertBranch,
-  shippingRates, type ShippingRate, type InsertShippingRate
+  shippingRates, type ShippingRate, type InsertShippingRate,
+  siteSettings, type SiteSetting
 } from "@shared/schema";
 
 export interface IStorage {
