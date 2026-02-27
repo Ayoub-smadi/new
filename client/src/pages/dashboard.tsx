@@ -58,18 +58,11 @@ export default function DashboardPage() {
         window.location.href = "/api/login";
       }, 500);
     } else if (!isLoading && isAuthenticated && !isAdmin) {
-      toast({
-        title: "غير مصرح",
-        description: "ليس لديك صلاحيات المسؤول للوصول إلى هذه الصفحة",
-        variant: "destructive",
-      });
-      setTimeout(() => {
-        window.location.href = "/";
-      }, 1500);
+      // Allow regular users to access their dashboard/profile
     }
   }, [isAuthenticated, isLoading, isAdmin, toast]);
 
-  if (isLoading || !isAuthenticated || !isAdmin) {
+  if (isLoading || !isAuthenticated) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -78,6 +71,85 @@ export default function DashboardPage() {
   }
 
   const { data: orders, isLoading: ordersLoading } = useOrders();
+
+  if (!isAdmin) {
+    return (
+      <div className="container px-4 py-8">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+          <div className="flex items-center gap-4">
+            <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-primary">
+              <div className="w-full h-full bg-muted flex items-center justify-center text-2xl font-bold text-muted-foreground uppercase">
+                {user?.firstName?.[0] || user?.username?.[0] || 'U'}
+              </div>
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold">أهلاً، {user?.firstName || user?.username}</h1>
+              <p className="text-muted-foreground">بيانات حسابك وطلباتك</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium">إجمالي الطلبات</CardTitle>
+              <Package className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{orders?.length || 0}</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium">البريد الإلكتروني</CardTitle>
+              <Settings className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-sm font-medium truncate">{user?.email}</div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <h2 className="text-xl font-bold mb-4">طلباتي الأخيرة</h2>
+        {ordersLoading ? (
+          <div className="flex justify-center p-8">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        ) : orders && orders.length > 0 ? (
+          <div className="grid gap-4">
+            {orders.map((order) => (
+              <Card key={order.id}>
+                <CardContent className="p-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                  <div className="space-y-1">
+                    <div className="font-bold">طلب #{order.id.slice(0, 8)}</div>
+                    <div className="text-sm text-muted-foreground">
+                      {format(new Date(order.createdAt!), "PPP", { locale: ar })}
+                    </div>
+                  </div>
+                  <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
+                    <div className="text-right">
+                      <div className="font-bold">{order.totalAmount} د.أ</div>
+                      <div className="text-xs text-muted-foreground">{order.paymentMethod === 'cod' ? 'دفع عند الاستلام' : 'بطاقة ائتمان'}</div>
+                    </div>
+                    <Badge className={getStatusColor(order.status)}>
+                      {getStatusText(order.status)}
+                    </Badge>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <Card className="p-8 text-center">
+            <div className="flex flex-col items-center gap-2">
+              <Package className="h-12 w-12 text-muted-foreground opacity-20" />
+              <p className="text-muted-foreground">ليس لديك أي طلبات بعد</p>
+            </div>
+          </Card>
+        )}
+      </div>
+    );
+  }
   const [isProductDialogOpen, setIsProductDialogOpen] = useState(false);
   const [isCategoryDialogOpen, setIsCategoryDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);

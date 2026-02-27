@@ -155,9 +155,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   <Link href="/dashboard">
                     <DropdownMenuItem className={`cursor-pointer ${isRtl ? 'justify-end' : 'justify-start'}`}>
                       {isRtl ? (
-                        <>{t('common.dashboard')} <LayoutDashboard className="ml-2 h-4 w-4" /></>
+                        <>{isAdmin ? t('common.dashboard') : 'حسابي'} <LayoutDashboard className="ml-2 h-4 w-4" /></>
                       ) : (
-                        <><LayoutDashboard className="mr-2 h-4 w-4" /> {t('common.dashboard')}</>
+                        <><LayoutDashboard className="mr-2 h-4 w-4" /> {isAdmin ? t('common.dashboard') : 'My Account'}</>
                       )}
                     </DropdownMenuItem>
                   </Link>
