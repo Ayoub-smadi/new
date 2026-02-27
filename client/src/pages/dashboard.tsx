@@ -43,6 +43,27 @@ import { useEffect } from "react";
 
 export default function DashboardPage() {
   const { user, isAdmin, isLoading, isAuthenticated } = useAuth();
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "processing": return "bg-yellow-100 text-yellow-800 hover:bg-yellow-200";
+      case "shipped": return "bg-blue-100 text-blue-800 hover:bg-blue-200";
+      case "delivered": return "bg-green-100 text-green-800 hover:bg-green-200";
+      case "cancelled": return "bg-red-100 text-red-800 hover:bg-red-200";
+      default: return "bg-gray-100 text-gray-800";
+    }
+  };
+
+  const getStatusText = (status: string) => {
+    const map: Record<string, string> = {
+      processing: "قيد المعالجة",
+      shipped: "تم الشحن",
+      delivered: "تم التوصيل",
+      cancelled: "ملغي"
+    };
+    return map[status] || status;
+  };
+
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [importing, setImporting] = useState(false);
@@ -404,26 +425,6 @@ export default function DashboardPage() {
       isFeatured: product.isFeatured || false,
     });
     setIsProductDialogOpen(true);
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "processing": return "bg-yellow-100 text-yellow-800 hover:bg-yellow-200";
-      case "shipped": return "bg-blue-100 text-blue-800 hover:bg-blue-200";
-      case "delivered": return "bg-green-100 text-green-800 hover:bg-green-200";
-      case "cancelled": return "bg-red-100 text-red-800 hover:bg-red-200";
-      default: return "bg-gray-100 text-gray-800";
-    }
-  };
-
-  const getStatusText = (status: string) => {
-    const map: Record<string, string> = {
-      processing: "قيد المعالجة",
-      shipped: "تم الشحن",
-      delivered: "تم التوصيل",
-      cancelled: "ملغي"
-    };
-    return map[status] || status;
   };
 
   const handleCsvImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
