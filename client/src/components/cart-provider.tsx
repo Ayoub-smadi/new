@@ -1,28 +1,34 @@
 import { useState, useEffect, ReactNode } from 'react';
 import { CartContext, type CartItem } from '@/hooks/use-cart';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/use-auth';
 import type { Product } from '@shared/schema';
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const { toast } = useToast();
+  const { user } = useAuth();
+  const cartKey = user ? `murooj_cart_${user.id}` : 'murooj_cart_guest';
 
-  // Load from local storage on mount
+  // Load from local storage when user changes
   useEffect(() => {
-    const savedCart = localStorage.getItem('agri_cart');
+    const savedCart = localStorage.getItem(cartKey);
     if (savedCart) {
       try {
         setItems(JSON.parse(savedCart));
       } catch (e) {
         console.error('Failed to parse cart', e);
+        setItems([]);
       }
+    } else {
+      setItems([]);
     }
-  }, []);
+  }, [cartKey]);
 
   // Save to local storage on change
   useEffect(() => {
-    localStorage.setItem('agri_cart', JSON.stringify(items));
-  }, [items]);
+    localStorage.setItem(cartKey, JSON.stringify(items));
+  }, [items, cartKey]);
 
   const addItem = (product: Product, quantity = 1) => {
     setItems(current => {
