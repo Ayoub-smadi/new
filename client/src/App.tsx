@@ -40,7 +40,8 @@ function Router() {
         <Route path="/cart" component={CartPage} />
         <Route path="/checkout" component={CheckoutPage} />
         <Route path="/dashboard" component={DashboardPage} />
-        <Route path="/nursery" component={NurseryPage} />
+        <Route path="/admin" component={DashboardPage} />
+        <Route path="/nursery" component={DashboardPage} />
         {/* Placeholder for About/Contact to prevent 404 on nav clicks */}
         <Route path="/about">
           <div className="container py-16 text-center">

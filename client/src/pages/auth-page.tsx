@@ -47,7 +47,7 @@ export default function AuthPage() {
       
       // Redirect based on role
       if (user.role === 'admin') {
-        setLocation("/admin");
+        setLocation("/dashboard");
       } else {
         setLocation("/");
       }
