@@ -18,6 +18,7 @@ export async function setupAuth(app: Express) {
     store: new PostgresStore({
       pool,
       createTableIfMissing: false,
+      tableName: 'sessions',
       errorLog: console.error,
     }),
     cookie: {
