@@ -30,26 +30,26 @@ export default function ProductDetailPage() {
     <div className="container px-4 py-8">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
         {/* Image Gallery */}
-        <div className="space-y-4">
-          <div className="aspect-square bg-muted rounded-2xl overflow-hidden border border-border/50 relative">
+        <div className="space-y-6">
+          <div className="aspect-square bg-white dark:bg-muted rounded-3xl overflow-hidden border-4 border-white dark:border-muted shadow-2xl relative group">
              <img 
                src={currentImage} 
                alt={product.name} 
-               className="w-full h-full object-cover transition-all duration-300"
+               className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110"
              />
              {product.discountPrice && (
-               <Badge className="absolute top-4 right-4 bg-destructive text-white text-lg px-3 py-1">
-                 خصم مميز
+               <Badge className="absolute top-6 right-6 bg-destructive text-white text-xl px-4 py-1.5 shadow-lg animate-pulse">
+                 عرض خاص
                </Badge>
              )}
           </div>
           {allImages.length > 1 && (
-            <div className="flex gap-2 overflow-x-auto pb-2">
+            <div className="flex gap-4 overflow-x-auto pb-4 px-2 no-scrollbar">
               {allImages.map((img, idx) => (
                 <button
                   key={idx}
                   onClick={() => setSelectedImage(img)}
-                  className={`w-20 h-20 rounded-md overflow-hidden border-2 shrink-0 ${currentImage === img ? 'border-primary' : 'border-transparent'}`}
+                  className={`w-24 h-24 rounded-2xl overflow-hidden border-4 transition-all duration-300 shrink-0 shadow-md ${currentImage === img ? 'border-primary scale-105 shadow-primary/20' : 'border-transparent hover:border-primary/30 opacity-70 hover:opacity-100'}`}
                 >
                   <img src={img} alt={`${product.name} ${idx + 1}`} className="w-full h-full object-cover" />
                 </button>
@@ -172,9 +172,16 @@ export default function ProductDetailPage() {
             </TabsTrigger>
           </TabsList>
           <TabsContent value="details" className="pt-8">
-            <div className="bg-card p-6 rounded-2xl border">
-              <h3 className="text-xl font-bold mb-4">وصف المنتج</h3>
-              <p className="text-muted-foreground leading-loose">{product.description}</p>
+            <div className="bg-white dark:bg-card p-8 rounded-[2rem] border-2 border-primary/5 shadow-xl shadow-primary/5">
+              <h3 className="text-2xl font-black mb-6 flex items-center gap-3 text-primary">
+                <span className="w-2 h-8 bg-primary rounded-full shadow-sm shadow-primary/50"></span>
+                تفاصيل المنتج الكاملة
+              </h3>
+              <div className="text-muted-foreground leading-relaxed text-lg whitespace-pre-line space-y-4">
+                {product.description.split('\n').map((line, i) => (
+                  <p key={i} className="min-h-[1.5em]">{line}</p>
+                ))}
+              </div>
             </div>
           </TabsContent>
           <TabsContent value="reviews" className="pt-8">

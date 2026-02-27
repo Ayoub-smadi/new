@@ -179,6 +179,9 @@ export async function registerRoutes(
   app.get(api.products.list.path, async (req, res) => {
     const { categoryId, subCategoryId, search, featured } = req.query;
     const isFeatured = featured === 'true' ? true : featured === 'false' ? false : undefined;
+    
+    // Default filter for non-admins to only see in-stock or specific products if needed
+    // But per request "added plants not visible", let's check storage logic
     const prods = await storage.getProducts(
       categoryId as string, 
       subCategoryId as string,

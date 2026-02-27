@@ -213,23 +213,23 @@ export default function ProductsPage() {
                       )}
                     </div>
                   </Link>
-                  <CardContent className="p-4 flex-1">
-                    <div className="flex justify-between items-start mb-2">
-                      <span className="text-xs text-muted-foreground bg-secondary px-2 py-0.5 rounded-full">
-                        {product.category.name}
-                      </span>
-                      <div className="flex items-center text-yellow-500 text-xs font-medium">
-                        <Star className="w-3 h-3 fill-current mr-1" />
-                        {product.rating} ({product.reviewsCount})
-                      </div>
-                    </div>
-                    <Link href={`/products/${product.id}`}>
-                      <h3 className="font-bold text-lg mb-2 hover:text-primary transition-colors cursor-pointer line-clamp-2 min-h-[3.5rem]">
+                  <CardContent className="p-4 flex-1 flex flex-col items-center text-center">
+                    <Link href={`/products/${product.id}`} className="w-full">
+                      <h3 className="font-bold text-xl mb-3 hover:text-primary transition-colors cursor-pointer line-clamp-2 min-h-[3.5rem] w-full text-foreground">
                         {product.name}
                       </h3>
                     </Link>
-                    <div className="flex items-baseline gap-2 mt-auto">
-                      <span className="text-xl font-bold text-primary">
+                    <div className="flex justify-between items-center mb-4 w-full px-2">
+                      <span className="text-xs font-medium text-primary bg-primary/10 px-3 py-1 rounded-full">
+                        {product.category.name}
+                      </span>
+                      <div className="flex items-center text-yellow-500 text-sm font-bold">
+                        <Star className="w-4 h-4 fill-current mr-1" />
+                        {product.rating}
+                      </div>
+                    </div>
+                    <div className="flex items-baseline justify-center gap-2 mt-auto w-full bg-muted/30 py-2 rounded-lg">
+                      <span className="text-2xl font-black text-primary">
                         {product.discountPrice || product.price} <span className="text-xs font-normal text-muted-foreground">د.أ</span>
                       </span>
                       {product.discountPrice && (
