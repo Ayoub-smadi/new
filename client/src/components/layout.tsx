@@ -19,7 +19,7 @@ import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 
 export function Layout({ children }: { children: React.ReactNode }) {
-  const { user, logout } = useAuth();
+  const { user, logout, isAdmin } = useAuth();
   const { theme, setTheme } = useTheme();
   const { count } = useCart();
   const [location] = useLocation();

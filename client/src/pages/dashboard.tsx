@@ -46,6 +46,7 @@ export default function DashboardPage() {
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [importing, setImporting] = useState(false);
+  const { data: orders, isLoading: ordersLoading } = useOrders();
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -69,8 +70,6 @@ export default function DashboardPage() {
       </div>
     );
   }
-
-  const { data: orders, isLoading: ordersLoading } = useOrders();
 
   if (!isAdmin) {
     return (
