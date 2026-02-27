@@ -2,11 +2,12 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api, buildUrl } from "@shared/routes";
 import type { CreateOrderRequest, UpdateOrderStatusRequest } from "@shared/schema";
 
-export function useOrders() {
+export function useOrders(all: boolean = false) {
   return useQuery({
-    queryKey: [api.orders.list.path],
+    queryKey: [api.orders.list.path, all],
     queryFn: async () => {
-      const res = await fetch(api.orders.list.path, { credentials: "include" });
+      const url = all ? `${api.orders.list.path}?all=true` : api.orders.list.path;
+      const res = await fetch(url, { credentials: "include" });
       if (!res.ok) throw new Error("Failed to fetch orders");
       return api.orders.list.responses[200].parse(await res.json());
     },
