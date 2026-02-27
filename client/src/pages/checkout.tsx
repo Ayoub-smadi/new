@@ -73,12 +73,13 @@ export default function CheckoutPage() {
           className: "bg-green-600 text-white border-none"
         });
         clearCart();
+        // Redirect to orders tab specifically if possible, or just dashboard
         setLocation("/dashboard");
       },
-      onError: (err) => {
+      onError: (err: any) => {
         toast({
           title: "حدث خطأ",
-          description: err.message,
+          description: err.message || "فشل إتمام الطلب، يرجى المحاولة لاحقاً",
           variant: "destructive"
         });
       }

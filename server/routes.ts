@@ -270,12 +270,13 @@ export async function registerRoutes(
         shippingAddress: input.shippingAddress,
         paymentMethod: input.paymentMethod,
         notes: input.notes,
-        regionId: req.body.regionId
+        regionId: input.regionId
       };
       
-      const order = await storage.createOrder(userId, orderData, input.items, req.body.regionId);
+      const order = await storage.createOrder(userId, orderData, input.items, input.regionId);
       res.status(201).json(order);
     } catch (err: any) {
+      console.error("Order creation error:", err);
       if (err instanceof z.ZodError) {
         return res.status(400).json({ message: err.errors[0].message, field: err.errors[0].path.join('.') });
       }
