@@ -37,7 +37,18 @@ export function useAuth() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(credentials),
       });
-      if (!res.ok) throw new Error("Login failed");
+      if (!res.ok) {
+        const contentType = res.headers.get("content-type");
+        let message = "Login failed";
+        if (contentType && contentType.includes("application/json")) {
+          const data = await res.json();
+          message = data.message || message;
+        } else {
+          const text = await res.text();
+          if (text) message = text;
+        }
+        throw new Error(message);
+      }
       return res.json();
     },
     onSuccess: (user) => {

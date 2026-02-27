@@ -39,12 +39,18 @@ export default function AuthPage() {
     const password = formData.get("password") as string;
 
     try {
-      await login({ email, password });
+      const user = await login({ email, password });
       toast({
         title: t('auth.login_success'),
         description: t('auth.welcome_back'),
       });
-      setLocation("/");
+      
+      // Redirect based on role
+      if (user.role === 'admin') {
+        setLocation("/admin");
+      } else {
+        setLocation("/");
+      }
     } catch (error: any) {
       toast({
         title: t('auth.login_failed'),

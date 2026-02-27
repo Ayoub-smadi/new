@@ -18,6 +18,7 @@ export async function setupAuth(app: Express) {
     store: new PostgresStore({
       pool,
       createTableIfMissing: true,
+      errorLog: console.error,
     }),
     cookie: {
       secure: app.get("env") === "production",
@@ -36,12 +37,22 @@ export async function setupAuth(app: Express) {
   passport.use(
     new LocalStrategy({ usernameField: "email" }, async (email, password, done) => {
       try {
+        console.log("Auth attempt for:", email);
         const user = await storage.getUserByEmail(email);
-        if (!user || !(await bcrypt.compare(password, user.password))) {
+        if (!user) {
+          console.log("User not found:", email);
+          return done(null, false, { message: "Invalid email or password" });
+        }
+        
+        const isMatch = await bcrypt.compare(password, user.password);
+        console.log("Password match for", email, ":", isMatch);
+        
+        if (!isMatch) {
           return done(null, false, { message: "Invalid email or password" });
         }
         return done(null, user);
       } catch (err) {
+        console.error("LocalStrategy error:", err);
         return done(err);
       }
     })
