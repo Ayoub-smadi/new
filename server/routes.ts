@@ -382,14 +382,57 @@ export async function registerRoutes(
     res.status(204).end();
   });
 
+  // SITE SETTINGS
+  app.get("/api/site-settings", async (req, res) => {
+    const settings = await storage.getSiteSettings();
+    res.json(settings);
+  });
+
+  app.get("/api/site-settings/:key", async (req, res) => {
+    const setting = await storage.getSiteSetting(req.params.key);
+    if (!setting) return res.status(404).json({ message: "Setting not found" });
+    res.json(setting);
+  });
+
+  app.post("/api/site-settings", isAuthenticated, isAdminMiddleware, async (req, res) => {
+    try {
+      const { key, value } = req.body;
+      if (!key || value === undefined) {
+        return res.status(400).json({ message: "Key and value are required" });
+      }
+      const setting = await storage.updateSiteSetting(key, value);
+      res.json(setting);
+    } catch (err) {
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
   // Call seed database
   try {
     await seedDatabase();
+    await seedSiteSettings();
   } catch (err) {
     console.error("Seeding error:", err);
   }
 
   return httpServer;
+}
+
+export async function seedSiteSettings() {
+  const defaultSettings = [
+    { key: "home_hero_title", value: "مروج لاند لخدمات الزراعة", description: "العنوان الرئيسي في الصفحة الرئيسية" },
+    { key: "home_hero_subtitle", value: "كل ما تحتاجه لحديقتك في مكان واحد", description: "العنوان الفرعي في الصفحة الرئيسية" },
+    { key: "about_content", value: "مروج لاند هي شركتكم الرائدة في تقديم الحلول الزراعية المتكاملة...", description: "محتوى صفحة من نحن" },
+    { key: "contact_email", value: "info@murooj.com", description: "بريد التواصل" },
+    { key: "contact_phone", value: "+962 000 000 000", description: "رقم الهاتف" },
+  ];
+
+  for (const setting of defaultSettings) {
+    const existing = await storage.getSiteSetting(setting.key);
+    if (!existing) {
+      await storage.updateSiteSetting(setting.key, setting.value);
+    }
+  }
 }
 
 export async function seedDatabase() {

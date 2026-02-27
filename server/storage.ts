@@ -65,6 +65,11 @@ export interface IStorage {
   // Admin Stats
   getAdminStats(): Promise<{ totalProducts: number, totalUsers: number, totalOrders: number, totalRevenue: number, lowStockProducts: number }>;
   createAdminUser(user: Partial<User>): Promise<User>;
+  
+  // Site Settings
+  getSiteSettings(): Promise<SiteSetting[]>;
+  getSiteSetting(key: string): Promise<SiteSetting | undefined>;
+  updateSiteSetting(key: string, value: string): Promise<SiteSetting>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -376,6 +381,26 @@ export class DatabaseStorage implements IStorage {
       role: "admin",
     } as any).returning();
     return user;
+  }
+
+  async getSiteSettings() {
+    return await db.select().from(siteSettings);
+  }
+
+  async getSiteSetting(key: string) {
+    const [setting] = await db.select().from(siteSettings).where(eq(siteSettings.key, key));
+    return setting;
+  }
+
+  async updateSiteSetting(key: string, value: string) {
+    const [setting] = await db.insert(siteSettings)
+      .values({ key, value })
+      .onConflictDoUpdate({
+        target: siteSettings.key,
+        set: { value, updatedAt: new Date() }
+      })
+      .returning();
+    return setting;
   }
 }
 

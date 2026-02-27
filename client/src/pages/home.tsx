@@ -7,12 +7,22 @@ import { Link } from "wouter";
 import { ArrowLeft, ArrowRight, Star, TrendingUp, ShieldCheck, Truck } from "lucide-react";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
+import { useQuery } from "@tanstack/react-query";
+import { type SiteSetting } from "@shared/schema";
 
 export default function Home() {
   const { data: featuredProducts, isLoading: productsLoading } = useProducts({ featured: true });
   const { data: categories, isLoading: categoriesLoading } = useCategories();
   const { t, i18n } = useTranslation();
   const isRtl = i18n.language === 'ar';
+  
+  const { data: settings } = useQuery<SiteSetting[]>({ 
+    queryKey: ["/api/site-settings"] 
+  });
+
+  const getSetting = (key: string, defaultValue: string) => {
+    return settings?.find(s => s.key === key)?.value || defaultValue;
+  };
 
   return (
     <div className="flex flex-col gap-12 pb-12">
@@ -39,10 +49,10 @@ export default function Home() {
               {t('hero.badge')}
             </Badge>
             <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight drop-shadow-lg">
-              {t('hero.title')} <span className="text-accent">{t('hero.brand')}</span>
+              {getSetting("home_hero_title", t('hero.title'))} <span className="text-accent">{t('hero.brand')}</span>
             </h1>
             <p className="text-lg md:text-xl text-white/90 leading-relaxed drop-shadow-md max-w-2xl mx-auto">
-              {t('hero.subtitle')}
+              {getSetting("home_hero_subtitle", t('hero.subtitle'))}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
               <Link href="/products">

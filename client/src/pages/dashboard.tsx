@@ -3,11 +3,11 @@ import { useAuth } from "@/hooks/use-auth";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Loader2, Package, Clock, CheckCircle, Plus, Edit, Trash2, LayoutDashboard, Settings, Truck } from "lucide-react";
+import { Loader2, Package, Clock, CheckCircle, Plus, Edit, Trash2, LayoutDashboard, Settings, Truck, Globe } from "lucide-react";
 import { format } from "date-fns";
 import { ar } from "date-fns/locale";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Product, Category, SubCategory, ShippingRate, NurseryGallery, insertProductSchema, insertCategorySchema, insertSubCategorySchema, insertShippingRateSchema, insertNurseryGallerySchema } from "@shared/schema";
+import { Product, Category, SubCategory, ShippingRate, NurseryGallery, SiteSetting, insertProductSchema, insertCategorySchema, insertSubCategorySchema, insertShippingRateSchema, insertNurseryGallerySchema } from "@shared/schema";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { api } from "@shared/routes";
@@ -163,6 +163,20 @@ export default function DashboardPage() {
 
   const { data: shippingRates } = useQuery<ShippingRate[]>({
     queryKey: ["/api/shipping-rates"],
+  });
+
+  const { data: siteSettings } = useQuery<SiteSetting[]>({
+    queryKey: ["/api/site-settings"],
+  });
+
+  const updateSiteSettingMutation = useMutation({
+    mutationFn: async ({ key, value }: { key: string, value: string }) => {
+      await apiRequest("POST", "/api/site-settings", { key, value });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/site-settings"] });
+      toast({ title: "تم تحديث الإعداد بنجاح" });
+    },
   });
 
   const categoryForm = useForm({
@@ -478,6 +492,50 @@ export default function DashboardPage() {
               {importing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
               استيراد من CSV
             </Button>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="gap-2">
+                  <Globe className="h-4 w-4" /> إعدادات الموقع
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle>إدارة محتوى الموقع</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4 max-h-[70vh] overflow-y-auto p-1">
+                  {siteSettings?.map((setting) => (
+                    <div key={setting.key} className="space-y-2 border-b pb-4">
+                      <label className="text-sm font-bold block">
+                        {setting.description || setting.key}
+                      </label>
+                      <div className="flex gap-2">
+                        {setting.key.includes("content") ? (
+                          <Textarea 
+                            defaultValue={setting.value}
+                            onBlur={(e) => {
+                              if (e.target.value !== setting.value) {
+                                updateSiteSettingMutation.mutate({ key: setting.key, value: e.target.value });
+                              }
+                            }}
+                            className="flex-1 text-right"
+                          />
+                        ) : (
+                          <Input 
+                            defaultValue={setting.value}
+                            onBlur={(e) => {
+                              if (e.target.value !== setting.value) {
+                                updateSiteSettingMutation.mutate({ key: setting.key, value: e.target.value });
+                              }
+                            }}
+                            className="flex-1 text-right"
+                          />
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </DialogContent>
+            </Dialog>
             <Dialog>
               <DialogTrigger asChild>
                 <Button variant="outline" className="gap-2">
