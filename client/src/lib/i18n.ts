@@ -46,10 +46,26 @@ const resources = {
       },
       "common": {
         "login": "Login",
+        "signup": "Sign Up",
         "logout": "Logout",
         "dashboard": "Dashboard",
         "welcome": "Welcome",
-        "switch_theme": "Switch Theme"
+        "switch_theme": "Switch Theme",
+        "loading": "Loading..."
+      },
+      "auth": {
+        "title": "Welcome to Murooj",
+        "description": "Access your account to manage your plants and orders",
+        "email": "Email Address",
+        "password": "Password",
+        "first_name": "First Name",
+        "last_name": "Last Name",
+        "login_success": "Login Successful",
+        "welcome_back": "Welcome back!",
+        "login_failed": "Login Failed",
+        "register_success": "Registration Successful",
+        "account_created": "Your account has been created successfully.",
+        "register_failed": "Registration Failed"
       }
     }
   },
@@ -96,10 +112,26 @@ const resources = {
       },
       "common": {
         "login": "تسجيل الدخول",
+        "signup": "إنشاء حساب",
         "logout": "تسجيل الخروج",
         "dashboard": "لوحة التحكم",
         "welcome": "مرحباً",
-        "switch_theme": "تبديل المظهر"
+        "switch_theme": "تبديل المظهر",
+        "loading": "جاري التحميل..."
+      },
+      "auth": {
+        "title": "مرحباً بك في مروج",
+        "description": "سجل دخولك لإدارة نباتاتك وطلباتك",
+        "email": "البريد الإلكتروني",
+        "password": "كلمة المرور",
+        "first_name": "الاسم الأول",
+        "last_name": "الاسم الأخير",
+        "login_success": "تم تسجيل الدخول بنجاح",
+        "welcome_back": "مرحباً بعودتك!",
+        "login_failed": "فشل تسجيل الدخول",
+        "register_success": "تم إنشاء الحساب بنجاح",
+        "account_created": "تم إنشاء حسابك بنجاح.",
+        "register_failed": "فشل إنشاء الحساب"
       }
     }
   }

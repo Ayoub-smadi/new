@@ -149,7 +149,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align={isRtl ? "end" : "start"} className="w-56">
                   <DropdownMenuLabel className={isRtl ? "text-right" : "text-left"}>
-                    {t('common.welcome')}، {user.firstName || 'Ayoub'}
+                    {t('common.welcome')}، {user.firstName || 'User'}
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <Link href="/dashboard">
@@ -175,11 +175,18 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <Button asChild variant="default" className="gap-2">
-                <a href="/api/login">
-                  {t('common.login')} <User className="h-4 w-4" />
-                </a>
-              </Button>
+              <div className="flex gap-2">
+                <Link href="/auth">
+                  <Button variant="outline" size="sm">
+                    {t('common.login')}
+                  </Button>
+                </Link>
+                <Link href="/auth?register=true">
+                  <Button variant="default" size="sm">
+                    {t('common.signup')}
+                  </Button>
+                </Link>
+              </div>
             )}
           </div>
         </div>

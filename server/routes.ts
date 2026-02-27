@@ -1,9 +1,10 @@
+import bcrypt from "bcryptjs";
 import type { Express, Request } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { api } from "@shared/routes";
 import { z } from "zod";
-import { setupAuth, registerAuthRoutes, isAuthenticated } from "./replit_integrations/auth";
+import { setupAuth, isAuthenticated } from "./auth";
 import type { RequestHandler } from "express";
 import multer from "multer";
 import path from "path";
@@ -47,10 +48,8 @@ export async function registerRoutes(
   // ADMIN CHECK MIDDLEWARE
   const isAdminMiddleware: RequestHandler = async (req: any, res, next) => {
     if (!req.isAuthenticated()) return res.status(401).json({ message: "Unauthorized" });
-    const user = await storage.getUser(req.user.claims.sub);
-    const isAdmin = user?.role === 'admin' || 
-                    user?.firstName?.toLowerCase() === 'ayoub' ||
-                    user?.email?.toLowerCase()?.includes('ayoub');
+    const user = req.user;
+    const isAdmin = user?.role === 'admin';
     
     if (!isAdmin) {
       console.log(`Admin access denied for user: ${user?.firstName} ${user?.lastName} (${user?.email})`);
@@ -237,15 +236,11 @@ export async function registerRoutes(
 
   // ORDERS
   app.get(api.orders.list.path, isAuthenticated, async (req: any, res) => {
-    // Return all orders for the user
-    // A real app might distinguish admins vs normal users here
-    const userId = req.user.claims.sub;
-    const user = await storage.getUser(userId);
-    const isAdmin = user?.role === 'admin' || user?.firstName === 'Ayoub';
+    const user = req.user;
+    const isAdmin = user?.role === 'admin';
     
-    // For MVP, if there's a specific flag we could return all, but let's just return for userId unless they pass a param
     const { all } = req.query;
-    const orders = await storage.getOrders((all === 'true' && isAdmin) ? undefined : userId);
+    const orders = await storage.getOrders((all === 'true' && isAdmin) ? undefined : user.id);
     res.json(orders);
   });
 
@@ -253,11 +248,10 @@ export async function registerRoutes(
     const order = await storage.getOrder(req.params.id as string);
     if (!order) return res.status(404).json({ message: "Order not found" });
     
-    const userId = req.user.claims.sub;
-    const user = await storage.getUser(userId);
-    const isAdmin = user?.role === 'admin' || user?.firstName === 'Ayoub';
+    const user = req.user;
+    const isAdmin = user?.role === 'admin';
     
-    if (order.userId !== userId && !isAdmin) {
+    if (order.userId !== user.id && !isAdmin) {
       return res.status(403).json({ message: "Forbidden" });
     }
     res.json(order);
@@ -266,7 +260,7 @@ export async function registerRoutes(
   app.post(api.orders.create.path, isAuthenticated, async (req: any, res) => {
     try {
       const input = api.orders.create.input.parse(req.body);
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       
       const orderData = {
         shippingAddress: input.shippingAddress,
@@ -308,7 +302,7 @@ export async function registerRoutes(
   app.post(api.reviews.create.path, isAuthenticated, async (req: any, res) => {
     try {
       const input = api.reviews.create.input.parse(req.body);
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const review = await storage.createReview({
         ...input,
         userId,
@@ -409,6 +403,34 @@ export async function seedDatabase() {
       name: "بذور",
       description: "بذور زراعية متنوعة عالية الجودة",
       imageUrl: "https://images.unsplash.com/photo-1523348837708-15d4a09cfac2"
+    });
+  }
+
+  // Create admin and customer users
+  const adminEmail = "admin@murooj.com";
+  const customerEmail = "customer@murooj.com";
+  
+  const existingAdmin = await storage.getUserByEmail(adminEmail);
+  if (!existingAdmin) {
+    const hashedPassword = await bcrypt.hash("admin123", 10);
+    await storage.createUser({
+      email: adminEmail,
+      password: hashedPassword,
+      firstName: "Admin",
+      lastName: "User",
+      role: "admin",
+    });
+  }
+
+  const existingCustomer = await storage.getUserByEmail(customerEmail);
+  if (!existingCustomer) {
+    const hashedPassword = await bcrypt.hash("customer123", 10);
+    await storage.createUser({
+      email: customerEmail,
+      password: hashedPassword,
+      firstName: "Customer",
+      lastName: "User",
+      role: "user",
     });
   }
 

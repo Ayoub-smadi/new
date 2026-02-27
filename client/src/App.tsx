@@ -17,6 +17,7 @@ import CartPage from "@/pages/cart";
 import CheckoutPage from "@/pages/checkout";
 import DashboardPage from "@/pages/dashboard";
 import NurseryPage from "@/pages/nursery";
+import AuthPage from "@/pages/auth-page";
 
 function Router() {
   const { isLoading } = useAuth();
@@ -33,6 +34,7 @@ function Router() {
     <Layout>
       <Switch>
         <Route path="/" component={Home} />
+        <Route path="/auth" component={AuthPage} />
         <Route path="/products" component={ProductsPage} />
         <Route path="/products/:id" component={ProductDetailPage} />
         <Route path="/cart" component={CartPage} />
