@@ -81,7 +81,7 @@ function Router() {
         <Route path="/checkout" component={CheckoutPage} />
         <Route path="/dashboard" component={DashboardPage} />
         <Route path="/admin" component={DashboardPage} />
-        <Route path="/nursery" component={DashboardPage} />
+        <Route path="/nursery" component={NurseryPage} />
         <Route path="/about" component={AboutPage} />
         <Route path="/contact" component={ContactPage} />
         <Route component={NotFound} />

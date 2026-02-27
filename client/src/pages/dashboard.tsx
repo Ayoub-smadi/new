@@ -59,9 +59,9 @@ export default function DashboardPage() {
         window.location.href = "/api/login";
       }, 500);
     } else if (!isLoading && isAuthenticated && !isAdmin) {
-      // Allow regular users to access their dashboard/profile
+      // For regular users, if they try to access dashboard we can show them their orders
     }
-  }, [isAuthenticated, isLoading, isAdmin, toast]);
+  }, [isAuthenticated, isLoading, isAdmin, toast, location]);
 
   if (isLoading || !isAuthenticated) {
     return (
