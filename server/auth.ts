@@ -62,7 +62,11 @@ export async function setupAuth(app: Express) {
 
   app.post("/api/register", async (req, res) => {
     try {
+      console.log("Registration attempt:", req.body.email);
       const { email, password, firstName, lastName } = req.body;
+      if (!email || !password) {
+        return res.status(400).json({ message: "Email and password are required" });
+      }
       const existingUser = await storage.getUserByEmail(email);
       if (existingUser) {
         return res.status(400).json({ message: "Email already exists" });
@@ -78,20 +82,35 @@ export async function setupAuth(app: Express) {
       });
 
       req.login(user, (err) => {
-        if (err) return res.status(500).json({ message: "Login failed after registration" });
+        if (err) {
+          console.error("Login error after registration:", err);
+          return res.status(500).json({ message: "Login failed after registration" });
+        }
         res.status(201).json(user);
       });
     } catch (err) {
+      console.error("Registration error:", err);
       res.status(500).json({ message: "Internal server error" });
     }
   });
 
   app.post("/api/login", (req, res, next) => {
+    console.log("Login attempt:", req.body.email);
     passport.authenticate("local", (err: any, user: any, info: any) => {
-      if (err) return next(err);
-      if (!user) return res.status(401).json({ message: info.message });
+      if (err) {
+        console.error("Auth error:", err);
+        return next(err);
+      }
+      if (!user) {
+        console.log("Login failed:", info?.message);
+        return res.status(401).json({ message: info?.message || "Invalid credentials" });
+      }
       req.login(user, (err) => {
-        if (err) return next(err);
+        if (err) {
+          console.error("Session login error:", err);
+          return next(err);
+        }
+        console.log("Login successful:", user.email);
         res.json(user);
       });
     })(req, res, next);
