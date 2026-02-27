@@ -32,6 +32,10 @@ const storage_multer = multer.diskStorage({
 
 const upload = multer({ storage: storage_multer });
 
+import { db } from "./db";
+import { users } from "@shared/schema";
+import { eq } from "drizzle-orm";
+
 export async function registerRoutes(
   httpServer: Server,
   app: Express
@@ -379,34 +383,16 @@ export async function registerRoutes(
   });
 
   // Call seed database
-  seedDatabase().catch(console.error);
+  try {
+    await seedDatabase();
+  } catch (err) {
+    console.error("Seeding error:", err);
+  }
 
   return httpServer;
 }
 
 export async function seedDatabase() {
-  const cats = await storage.getCategories();
-  
-  // Seed shipping rates if empty
-  const rates = await storage.getShippingRates();
-  if (rates.length === 0) {
-    await storage.createShippingRate({ region: "الشمال", governorates: "جرش، عجلون، إربد، المفرق", rate: "3.00" });
-    await storage.createShippingRate({ region: "عمان", governorates: "عمان", rate: "3.00" });
-    await storage.createShippingRate({ region: "الوسط", governorates: "البلقاء، الزرقاء، مادبا", rate: "4.00" });
-    await storage.createShippingRate({ region: "الجنوب والأغوار", governorates: "الكرك، الطفيلة، معان، العقبة، الأغوار", rate: "5.00" });
-  }
-
-  // Ensure "بذور" category exists
-  let seedsCategory = cats.find(c => c.name === "بذور");
-  if (!seedsCategory) {
-    seedsCategory = await storage.createCategory({
-      name: "بذور",
-      description: "بذور زراعية متنوعة عالية الجودة",
-      imageUrl: "https://images.unsplash.com/photo-1523348837708-15d4a09cfac2"
-    });
-  }
-
-  // Create admin and customer users
   const adminEmail = "admin@murooj.com";
   const customerEmail = "customer@murooj.com";
   
@@ -420,6 +406,12 @@ export async function seedDatabase() {
       lastName: "User",
       role: "admin",
     });
+    console.log("Admin user seeded: admin@murooj.com / admin123");
+  } else {
+    // Force update password to be sure
+    const hashedPassword = await bcrypt.hash("admin123", 10);
+    await db.update(users).set({ password: hashedPassword }).where(eq(users.email, adminEmail));
+    console.log("Admin password updated during seed");
   }
 
   const existingCustomer = await storage.getUserByEmail(customerEmail);
@@ -432,7 +424,15 @@ export async function seedDatabase() {
       lastName: "User",
       role: "user",
     });
+    console.log("Customer user seeded: customer@murooj.com / customer123");
+  } else {
+    // Force update password to be sure
+    const hashedPassword = await bcrypt.hash("customer123", 10);
+    await db.update(users).set({ password: hashedPassword }).where(eq(users.email, customerEmail));
+    console.log("Customer password updated during seed");
   }
+
+  const cats = await storage.getCategories();
 
   // If no products in "بذور" category, we could seed them here, 
   // but since we already ran the script and Replit DB is persistent, 

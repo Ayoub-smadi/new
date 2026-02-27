@@ -23,7 +23,7 @@ app.use(
 app.use(express.urlencoded({ extended: false }));
 
 // IMPORTANT: Setup auth before routes
-import { setupAuth, registerAuthRoutes } from "./replit_integrations/auth";
+import { setupAuth } from "./auth";
 
 export function log(message: string, source = "express") {
   const formattedTime = new Date().toLocaleTimeString("en-US", {
@@ -65,7 +65,6 @@ app.use((req, res, next) => {
 (async () => {
   // IMPORTANT: Setup auth before other routes
   await setupAuth(app);
-  registerAuthRoutes(app);
 
   await registerRoutes(httpServer, app);
 
