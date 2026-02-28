@@ -60,6 +60,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
     { href: "/", label: t('nav.home') },
     { href: "/products", label: t('nav.shop') },
     { href: "/nursery", label: t('nav.nursery') },
+    { href: "/branches", label: t('nav.branches') || (isRtl ? "الفروع" : "Branches") },
     { href: "/about", label: t('nav.about') },
     { href: "/contact", label: t('nav.contact') },
   ];

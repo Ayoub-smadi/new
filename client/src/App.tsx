@@ -18,6 +18,7 @@ import CheckoutPage from "@/pages/checkout";
 import DashboardPage from "@/pages/dashboard";
 import NurseryPage from "@/pages/nursery";
 import NurseryDetailPage from "@/pages/nursery/[id]";
+import BranchesPage from "@/pages/branches";
 import AuthPage from "@/pages/auth-page";
 
 import { useQuery } from "@tanstack/react-query";
@@ -84,6 +85,7 @@ function Router() {
         <Route path="/admin" component={DashboardPage} />
         <Route path="/nursery" component={NurseryPage} />
         <Route path="/nursery/:id" component={NurseryDetailPage} />
+        <Route path="/branches" component={BranchesPage} />
         <Route path="/about" component={AboutPage} />
         <Route path="/contact" component={ContactPage} />
         <Route component={NotFound} />

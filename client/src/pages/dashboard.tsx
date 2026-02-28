@@ -9,7 +9,7 @@ import { format } from "date-fns";
 import { ar } from "date-fns/locale";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import SocialLinksManager from "@/components/admin/social-links-manager";
-import { Product, Category, SubCategory, ShippingRate, NurseryGallery, SiteSetting, insertProductSchema, insertCategorySchema, insertSubCategorySchema, insertShippingRateSchema, insertNurseryGallerySchema } from "@shared/schema";
+import { Product, Category, SubCategory, ShippingRate, NurseryGallery, Branch, SiteSetting, insertProductSchema, insertCategorySchema, insertSubCategorySchema, insertShippingRateSchema, insertNurseryGallerySchema, insertBranchSchema } from "@shared/schema";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { api } from "@shared/routes";
@@ -171,6 +171,43 @@ export default function DashboardPage() {
 
   const { data: nurseryItems } = useQuery<NurseryGallery[]>({
     queryKey: ["/api/nursery"],
+  });
+
+  const { data: branches } = useQuery<Branch[]>({
+    queryKey: ["/api/branches"],
+  });
+
+  const [isBranchDialogOpen, setIsBranchDialogOpen] = useState(false);
+  const branchForm = useForm({
+    resolver: zodResolver(insertBranchSchema),
+    defaultValues: {
+      name: "",
+      description: "",
+      imageUrl: "",
+      locationUrl: "",
+    },
+  });
+
+  const branchMutation = useMutation({
+    mutationFn: async (data: any) => {
+      return await apiRequest("POST", "/api/branches", data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/branches"] });
+      setIsBranchDialogOpen(false);
+      branchForm.reset();
+      toast({ title: "تم إضافة الفرع بنجاح" });
+    },
+  });
+
+  const deleteBranchMutation = useMutation({
+    mutationFn: async (id: string) => {
+      await apiRequest("DELETE", `/api/branches/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/branches"] });
+      toast({ title: "تم حذف الفرع بنجاح" });
+    },
   });
 
   const [selectedCategoryIdForSub] = useState<string>("");
@@ -358,6 +395,13 @@ export default function DashboardPage() {
                 onClick={() => setActiveTab("nursery")}
               >
                 <Globe className="h-4 w-4 ml-2" /> إدارة المشتل
+              </Button>
+              <Button 
+                variant={activeTab === "branches" ? "default" : "ghost"} 
+                className="w-full justify-start gap-2 text-right"
+                onClick={() => setActiveTab("branches")}
+              >
+                <MapPin className="h-4 w-4 ml-2" /> إدارة الفروع
               </Button>
             </nav>
           </div>
@@ -1071,137 +1115,452 @@ export default function DashboardPage() {
               </section>
             )}
           </div>
-          {activeTab === "nursery" && isAdmin && (
-            <div className="space-y-6">
-              <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-bold">إدارة المشتل</h2>
-                <Dialog open={isNurseryDialogOpen} onOpenChange={setIsNurseryDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button className="gap-2">
-                      <Plus className="h-4 w-4" /> إضافة نبتة للمشتل
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="text-right max-w-2xl">
-                    <DialogHeader>
-                      <DialogTitle className="text-right">إضافة نبتة جديدة</DialogTitle>
-                    </DialogHeader>
-                    <Form {...nurseryForm}>
-                      <form onSubmit={nurseryForm.handleSubmit((data) => nurseryMutation.mutate(data))} className="space-y-4">
-                        <FormField
-                          control={nurseryForm.control}
-                          name="title"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>الاسم</FormLabel>
-                              <FormControl><Input {...field} className="text-right" /></FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
+            {activeTab === "nursery" && isAdmin && (
+              <div className="space-y-6">
+                <div className="flex justify-between items-center">
+                  <h2 className="text-2xl font-bold">إدارة المشتل</h2>
+                  <Dialog open={isNurseryDialogOpen} onOpenChange={setIsNurseryDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button className="gap-2">
+                        <Plus className="h-4 w-4" /> إضافة نبتة للمشتل
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="text-right max-w-2xl">
+                      <DialogHeader>
+                        <DialogTitle className="text-right">إضافة نبتة جديدة</DialogTitle>
+                      </DialogHeader>
+                      <Form {...nurseryForm}>
+                        <form onSubmit={nurseryForm.handleSubmit((data) => nurseryMutation.mutate(data))} className="space-y-4">
                           <FormField
                             control={nurseryForm.control}
-                            name="category"
+                            name="title"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>التصنيف</FormLabel>
-                                <FormControl><Input {...field} className="text-right" placeholder="مثلاً: حمضيات، زينة" /></FormControl>
+                                <FormLabel>الاسم</FormLabel>
+                                <FormControl><Input {...field} className="text-right" /></FormControl>
                                 <FormMessage />
                               </FormItem>
                             )}
                           />
-                        <FormField
-                          control={nurseryForm.control}
-                          name="imageUrl"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>الصورة</FormLabel>
-                              <FormControl>
-                                <div className="space-y-2">
-                                  <Input 
-                                    type="file" 
-                                    accept="image/*" 
-                                    className="text-right"
-                                    onChange={async (e) => {
-                                      const file = e.target.files?.[0];
-                                      if (file) {
-                                        const formData = new FormData();
-                                        formData.append("file", file);
-                                        try {
-                                          const res = await fetch("/api/upload", {
-                                            method: "POST",
-                                            body: formData,
-                                          });
-                                          const data = await res.json();
-                                          field.onChange(data.url);
-                                          toast({ title: "تم رفع الصورة بنجاح" });
-                                        } catch (error) {
-                                          toast({ title: "فشل رفع الصورة", variant: "destructive" });
+                            <FormField
+                              control={nurseryForm.control}
+                              name="category"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>التصنيف</FormLabel>
+                                  <FormControl><Input {...field} className="text-right" placeholder="مثلاً: حمضيات، زينة" /></FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          <FormField
+                            control={nurseryForm.control}
+                            name="imageUrl"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>الصورة</FormLabel>
+                                <FormControl>
+                                  <div className="space-y-2">
+                                    <Input 
+                                      type="file" 
+                                      accept="image/*" 
+                                      className="text-right"
+                                      onChange={async (e) => {
+                                        const file = e.target.files?.[0];
+                                        if (file) {
+                                          const formData = new FormData();
+                                          formData.append("file", file);
+                                          try {
+                                            const res = await fetch("/api/upload", {
+                                              method: "POST",
+                                              body: formData,
+                                            });
+                                            const data = await res.json();
+                                            field.onChange(data.url);
+                                            toast({ title: "تم رفع الصورة بنجاح" });
+                                          } catch (error) {
+                                            toast({ title: "فشل رفع الصورة", variant: "destructive" });
+                                          }
                                         }
-                                      }
-                                    }}
-                                  />
-                                  {field.value && (
-                                    <img src={field.value} alt="Preview" className="w-20 h-20 object-cover rounded-lg border" />
-                                  )}
-                                  <Input type="hidden" {...field} />
-                                </div>
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={nurseryForm.control}
-                          name="description"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>الوصف</FormLabel>
-                              <FormControl><Textarea {...field} className="text-right" rows={4} /></FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <Button type="submit" className="w-full" disabled={nurseryMutation.isPending}>
-                          {nurseryMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                          حفظ النبتة
-                        </Button>
-                      </form>
-                    </Form>
-                  </DialogContent>
-                </Dialog>
-              </div>
+                                      }}
+                                    />
+                                    {field.value && (
+                                      <img src={field.value} alt="Preview" className="w-20 h-20 object-cover rounded-lg border" />
+                                    )}
+                                    <Input type="hidden" {...field} />
+                                  </div>
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={nurseryForm.control}
+                            name="description"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>الوصف</FormLabel>
+                                <FormControl><Textarea {...field} className="text-right" rows={4} /></FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <Button type="submit" className="w-full" disabled={nurseryMutation.isPending}>
+                            {nurseryMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                            حفظ النبتة
+                          </Button>
+                        </form>
+                      </Form>
+                    </DialogContent>
+                  </Dialog>
+                </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {nurseryItems?.map((item) => (
-                  <Card key={item.id} className="overflow-hidden">
-                    <img src={item.imageUrl} alt={item.title} className="w-full h-48 object-cover" />
-                    <CardContent className="p-4">
-                      <div className="flex justify-between items-start mb-2">
-                        <Badge>{item.type}</Badge>
-                        <h3 className="font-bold">{item.title}</h3>
-                      </div>
-                      <p className="text-sm text-muted-foreground line-clamp-2 mb-4">{item.description}</p>
-                      <Button 
-                        variant="destructive" 
-                        size="sm" 
-                        className="w-full gap-2"
-                        onClick={() => {
-                          if (confirm("هل أنت متأكد من حذف هذه النبتة؟")) {
-                            apiRequest("DELETE", `/api/nursery/${item.id}`).then(() => {
-                              queryClient.invalidateQueries({ queryKey: ["/api/nursery"] });
-                              toast({ title: "تم الحذف بنجاح" });
-                            });
-                          }
-                        }}
-                      >
-                        <Trash2 className="h-4 w-4" /> حذف
-                      </Button>
-                    </CardContent>
-                  </Card>
-                ))}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {nurseryItems?.map((item) => (
+                    <Card key={item.id} className="overflow-hidden">
+                      <img src={item.imageUrl} alt={item.title} className="w-full h-48 object-cover" />
+                      <CardContent className="p-4">
+                          <div className="flex justify-between items-start mb-2">
+                            <Badge>{item.category}</Badge>
+                            <h3 className="font-bold text-right">{item.title}</h3>
+                          </div>
+                        <p className="text-sm text-muted-foreground line-clamp-2 mb-4 text-right">{item.description}</p>
+                        <Button 
+                          variant="destructive" 
+                          size="sm" 
+                          className="w-full gap-2"
+                          onClick={() => {
+                            if (confirm("هل أنت متأكد من حذف هذه النبتة؟")) {
+                              apiRequest("DELETE", `/api/nursery/${item.id}`).then(() => {
+                                queryClient.invalidateQueries({ queryKey: ["/api/nursery"] });
+                                toast({ title: "تم الحذف بنجاح" });
+                              });
+                            }
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4" /> حذف
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            )}
+
+            {activeTab === "branches" && isAdmin && (
+              <div className="space-y-6">
+                <div className="flex justify-between items-center">
+                  <h2 className="text-2xl font-bold">إدارة الفروع</h2>
+                  <Dialog open={isBranchDialogOpen} onOpenChange={setIsBranchDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button className="gap-2">
+                        <Plus className="h-4 w-4" /> إضافة فرع جديد
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="text-right max-w-2xl">
+                      <DialogHeader>
+                        <DialogTitle className="text-right">إضافة فرع جديد</DialogTitle>
+                      </DialogHeader>
+                      <Form {...branchForm}>
+                        <form onSubmit={branchForm.handleSubmit((data) => branchMutation.mutate(data))} className="space-y-4">
+                          <FormField
+                            control={branchForm.control}
+                            name="name"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>اسم الفرع</FormLabel>
+                                <FormControl><Input {...field} className="text-right" /></FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={branchForm.control}
+                            name="description"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>الوصف</FormLabel>
+                                <FormControl><Textarea {...field} className="text-right" rows={4} /></FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={branchForm.control}
+                            name="imageUrl"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>رابط الصورة</FormLabel>
+                                <FormControl><Input {...field} className="text-right" /></FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={branchForm.control}
+                            name="locationUrl"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>رابط الموقع (Google Maps)</FormLabel>
+                                <FormControl><Input {...field} className="text-right" /></FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <Button type="submit" className="w-full" disabled={branchMutation.isPending}>
+                            {branchMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                            إضافة الفرع
+                          </Button>
+                        </form>
+                      </Form>
+                    </DialogContent>
+                  </Dialog>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {branches?.map((branch) => (
+                    <Card key={branch.id} className="overflow-hidden">
+                      <img src={branch.imageUrl} alt={branch.name} className="w-full h-48 object-cover" />
+                      <CardContent className="p-4">
+                        <h3 className="font-bold text-lg mb-2 text-right">{branch.name}</h3>
+                        <p className="text-sm text-muted-foreground line-clamp-2 mb-4 text-right">{branch.description}</p>
+                        <div className="flex gap-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="flex-1"
+                            onClick={() => window.open(branch.locationUrl, "_blank")}
+                          >
+                            عرض الموقع
+                          </Button>
+                          <Button 
+                            variant="destructive" 
+                            size="icon"
+                            onClick={() => {
+                              if (confirm("هل أنت متأكد من حذف هذا الفرع؟")) {
+                                deleteBranchMutation.mutate(branch.id);
+                              }
+                            }}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {activeTab === "branches" && isAdmin && (
+              <div className="space-y-6">
+                <div className="flex justify-between items-center">
+                  <h2 className="text-2xl font-bold">إدارة الفروع</h2>
+                  <Dialog open={isBranchDialogOpen} onOpenChange={setIsBranchDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button className="gap-2">
+                        <Plus className="h-4 w-4" /> إضافة فرع جديد
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="text-right max-w-2xl">
+                      <DialogHeader>
+                        <DialogTitle className="text-right">إضافة فرع جديد</DialogTitle>
+                      </DialogHeader>
+                      <Form {...branchForm}>
+                        <form onSubmit={branchForm.handleSubmit((data) => branchMutation.mutate(data))} className="space-y-4">
+                          <FormField
+                            control={branchForm.control}
+                            name="name"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>اسم الفرع</FormLabel>
+                                <FormControl><Input {...field} className="text-right" /></FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={branchForm.control}
+                            name="description"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>الوصف</FormLabel>
+                                <FormControl><Textarea {...field} className="text-right" rows={4} /></FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={branchForm.control}
+                            name="imageUrl"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>رابط الصورة</FormLabel>
+                                <FormControl><Input {...field} className="text-right" /></FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={branchForm.control}
+                            name="locationUrl"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>رابط الموقع (Google Maps)</FormLabel>
+                                <FormControl><Input {...field} className="text-right" /></FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <Button type="submit" className="w-full" disabled={branchMutation.isPending}>
+                            {branchMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                            إضافة الفرع
+                          </Button>
+                        </form>
+                      </Form>
+                    </DialogContent>
+                  </Dialog>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {branches?.map((branch) => (
+                    <Card key={branch.id} className="overflow-hidden">
+                      <img src={branch.imageUrl} alt={branch.name} className="w-full h-48 object-cover" />
+                      <CardContent className="p-4">
+                        <h3 className="font-bold text-lg mb-2 text-right">{branch.name}</h3>
+                        <p className="text-sm text-muted-foreground line-clamp-2 mb-4 text-right">{branch.description}</p>
+                        <div className="flex gap-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="flex-1"
+                            onClick={() => window.open(branch.locationUrl, "_blank")}
+                          >
+                            عرض الموقع
+                          </Button>
+                          <Button 
+                            variant="destructive" 
+                            size="icon"
+                            onClick={() => {
+                              if (confirm("هل أنت متأكد من حذف هذا الفرع؟")) {
+                                deleteBranchMutation.mutate(branch.id);
+                              }
+                            }}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {activeTab === "branches" && isAdmin && (
+              <div className="space-y-6">
+                <div className="flex justify-between items-center">
+                  <h2 className="text-2xl font-bold">إدارة الفروع</h2>
+                  <Dialog open={isBranchDialogOpen} onOpenChange={setIsBranchDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button className="gap-2">
+                        <Plus className="h-4 w-4" /> إضافة فرع جديد
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="text-right max-w-2xl">
+                      <DialogHeader>
+                        <DialogTitle className="text-right">إضافة فرع جديد</DialogTitle>
+                      </DialogHeader>
+                      <Form {...branchForm}>
+                        <form onSubmit={branchForm.handleSubmit((data) => branchMutation.mutate(data))} className="space-y-4">
+                          <FormField
+                            control={branchForm.control}
+                            name="name"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>اسم الفرع</FormLabel>
+                                <FormControl><Input {...field} className="text-right" /></FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={branchForm.control}
+                            name="description"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>الوصف</FormLabel>
+                                <FormControl><Textarea {...field} className="text-right" rows={4} /></FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={branchForm.control}
+                            name="imageUrl"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>رابط الصورة</FormLabel>
+                                <FormControl><Input {...field} className="text-right" /></FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={branchForm.control}
+                            name="locationUrl"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>رابط الموقع (Google Maps)</FormLabel>
+                                <FormControl><Input {...field} className="text-right" /></FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <Button type="submit" className="w-full" disabled={branchMutation.isPending}>
+                            {branchMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                            إضافة الفرع
+                          </Button>
+                        </form>
+                      </Form>
+                    </DialogContent>
+                  </Dialog>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {branches?.map((branch) => (
+                    <Card key={branch.id} className="overflow-hidden">
+                      <img src={branch.imageUrl} alt={branch.name} className="w-full h-48 object-cover" />
+                      <CardContent className="p-4">
+                        <h3 className="font-bold text-lg mb-2 text-right">{branch.name}</h3>
+                        <p className="text-sm text-muted-foreground line-clamp-2 mb-4 text-right">{branch.description}</p>
+                        <div className="flex gap-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="flex-1"
+                            onClick={() => window.open(branch.locationUrl, "_blank")}
+                          >
+                            عرض الموقع
+                          </Button>
+                          <Button 
+                            variant="destructive" 
+                            size="icon"
+                            onClick={() => {
+                              if (confirm("هل أنت متأكد من حذف هذا الفرع؟")) {
+                                deleteBranchMutation.mutate(branch.id);
+                              }
+                            }}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            )}
         </div>
       </div>
     </div>

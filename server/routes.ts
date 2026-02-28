@@ -454,6 +454,38 @@ export async function registerRoutes(
     console.error("Seeding error:", err);
   }
 
+  // BRANCHES
+  app.get("/api/branches", async (_req, res) => {
+    try {
+      const branches = await storage.getBranches();
+      res.json(branches);
+    } catch (err) {
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.post("/api/branches", isAuthenticated, isAdminMiddleware, async (req, res) => {
+    try {
+      const input = insertBranchSchema.parse(req.body);
+      const branch = await storage.createBranch(input);
+      res.status(201).json(branch);
+    } catch (err: any) {
+      if (err instanceof z.ZodError) {
+        return res.status(400).json({ message: err.errors[0].message });
+      }
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.delete("/api/branches/:id", isAuthenticated, isAdminMiddleware, async (req, res) => {
+    try {
+      await storage.deleteBranch(req.params.id);
+      res.status(204).end();
+    } catch (err) {
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
   return httpServer;
 }
 

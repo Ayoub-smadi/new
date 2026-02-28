@@ -24,6 +24,12 @@ export default function NurseryPage() {
 
   const plantCategories = Array.from(new Set(items?.map(item => item.category).filter(Boolean))) as string[];
 
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+
+  const filteredItems = selectedCategory 
+    ? items?.filter(item => item.category === selectedCategory)
+    : items;
+
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       await apiRequest("DELETE", `/api/nursery/${id}`);
@@ -68,20 +74,36 @@ export default function NurseryPage() {
       {/* Categories Section */}
       <section className="mb-16">
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-          {plantCategories?.map((category, i) => (
+          <motion.div
+            whileHover={{ scale: 1.05 }}
+            className={`border rounded-xl p-4 cursor-pointer text-center transition-colors ${
+              selectedCategory === null 
+                ? "bg-primary text-primary-foreground border-primary" 
+                : "bg-primary/5 hover:bg-primary/10 border-primary/10 text-primary"
+            }`}
+            onClick={() => setSelectedCategory(null)}
+          >
+            <h3 className="font-bold">{isRtl ? "الكل" : "All"}</h3>
+          </motion.div>
+          {plantCategories?.map((category) => (
             <motion.div
               key={category}
               whileHover={{ scale: 1.05 }}
-              className="bg-primary/5 hover:bg-primary/10 border border-primary/10 rounded-xl p-4 cursor-pointer text-center transition-colors"
+              className={`border rounded-xl p-4 cursor-pointer text-center transition-colors ${
+                selectedCategory === category 
+                  ? "bg-primary text-primary-foreground border-primary" 
+                  : "bg-primary/5 hover:bg-primary/10 border-primary/10 text-primary"
+              }`}
+              onClick={() => setSelectedCategory(category)}
             >
-              <h3 className="text-primary font-bold">{category}</h3>
+              <h3 className="font-bold">{category}</h3>
             </motion.div>
           ))}
         </div>
       </section>
 
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-        {items?.map((item, index) => (
+        {filteredItems?.map((item, index) => (
           <motion.div
             key={item.id}
             initial={{ opacity: 0, y: 20 }}
