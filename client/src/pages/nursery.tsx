@@ -1,5 +1,5 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { NurseryGallery } from "@shared/schema";
+import { NurseryGallery, Category } from "@shared/schema";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Card, CardContent } from "@/components/ui/card";
 import { Loader2, Trash2, X, ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
@@ -9,7 +9,7 @@ import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
-import { useLocation } from "wouter";
+import { useLocation, Link } from "wouter";
 
 export default function NurseryPage() {
   const [, setLocation] = useLocation();
@@ -20,6 +20,10 @@ export default function NurseryPage() {
 
   const { data: items, isLoading } = useQuery<NurseryGallery[]>({
     queryKey: ["/api/nursery"],
+  });
+
+  const { data: categories } = useQuery<Category[]>({
+    queryKey: ["/api/categories"],
   });
 
   const deleteMutation = useMutation({
@@ -62,6 +66,29 @@ export default function NurseryPage() {
         </p>
         <div className="w-16 h-1 bg-primary mx-auto rounded-full mt-4" />
       </motion.div>
+
+      {/* Categories Section */}
+      <section className="mb-16">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          {categories?.map((category, i) => (
+            <Link key={category.id} href={`/products?category=${category.id}`}>
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                className="group relative h-40 rounded-2xl overflow-hidden cursor-pointer bg-black/5"
+              >
+                <img 
+                  src={category.imageUrl || `https://images.unsplash.com/photo-1416879598555-22442b083d03`} 
+                  alt={category.name}
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                />
+                <div className={`absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex items-end p-4 ${isRtl ? 'text-right' : 'text-left'}`}>
+                  <h3 className="text-white font-bold text-lg">{category.name}</h3>
+                </div>
+              </motion.div>
+            </Link>
+          ))}
+        </div>
+      </section>
 
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
         {items?.map((item, index) => (
