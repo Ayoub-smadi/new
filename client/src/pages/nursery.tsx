@@ -63,7 +63,7 @@ export default function NurseryPage() {
         <div className="w-16 h-1 bg-primary mx-auto rounded-full mt-4" />
       </motion.div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
         {items?.map((item, index) => (
           <motion.div
             key={item.id}
@@ -72,11 +72,11 @@ export default function NurseryPage() {
             transition={{ delay: index * 0.05 }}
           >
             <Card 
-              className="group overflow-hidden border border-border/50 hover:border-primary/30 transition-all duration-300 shadow-sm hover:shadow-md rounded-2xl"
+              className="group overflow-hidden border border-border/40 hover:border-primary/20 transition-all duration-300 shadow-sm hover:shadow-md rounded-xl"
             >
               <CardContent className="p-0">
                 <div 
-                  className="aspect-square overflow-hidden cursor-pointer relative"
+                  className="aspect-[4/5] overflow-hidden cursor-pointer relative"
                   onClick={() => setLocation(`/nursery/${item.id}`)}
                 >
                   <img 
@@ -85,33 +85,33 @@ export default function NurseryPage() {
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                   <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <div className="bg-white/90 p-2 rounded-full shadow-lg">
-                      <ArrowRight className={`h-5 w-5 text-primary ${isRtl ? 'rotate-180' : ''}`} />
+                    <div className="bg-white/90 p-1.5 rounded-full shadow-lg">
+                      <ArrowRight className={`h-4 w-4 text-primary ${isRtl ? 'rotate-180' : ''}`} />
                     </div>
                   </div>
                 </div>
-                <div className="p-4 space-y-2">
-                  <h3 className="font-bold text-lg line-clamp-1">{item.title}</h3>
-                  <p className="text-sm text-muted-foreground line-clamp-2 min-h-[2.5rem]">
+                <div className="p-3 space-y-1">
+                  <h3 className="font-bold text-sm line-clamp-1">{item.title}</h3>
+                  <p className="text-xs text-muted-foreground line-clamp-1">
                     {item.description}
                   </p>
-                  <div className="flex items-center justify-between pt-2">
+                  <div className="flex items-center justify-between pt-1">
                     <Button 
                       variant="link" 
-                      className="p-0 h-auto text-primary font-semibold"
+                      className="p-0 h-auto text-xs text-primary font-semibold"
                       onClick={() => setLocation(`/nursery/${item.id}`)}
                     >
-                      {isRtl ? "عرض التفاصيل" : "View Details"}
+                      {isRtl ? "التفاصيل" : "Details"}
                     </Button>
                     {isAdmin && (
                       <Button 
                         variant="ghost" 
                         size="icon"
-                        className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                        className="h-6 w-6 text-destructive hover:text-destructive hover:bg-destructive/10"
                         onClick={() => deleteMutation.mutate(item.id)}
                         disabled={deleteMutation.isPending}
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className="h-3 w-3" />
                       </Button>
                     )}
                   </div>
