@@ -152,6 +152,7 @@ export default function DashboardPage() {
       description: "",
       imageUrl: "",
       additionalImages: [],
+      type: "plant",
       category: "عام",
     },
   });
