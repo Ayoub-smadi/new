@@ -270,6 +270,8 @@ export async function registerRoutes(
       const userId = req.user.id;
       
       const orderData = {
+        customerName: input.customerName,
+        customerPhone: input.customerPhone,
         shippingAddress: input.shippingAddress,
         paymentMethod: input.paymentMethod,
         notes: input.notes,

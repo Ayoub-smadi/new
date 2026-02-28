@@ -42,6 +42,8 @@ export const products = pgTable("products", {
 export const orders = pgTable("orders", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: varchar("user_id").notNull().references(() => users.id),
+  customerName: text("customer_name").notNull().default(""),
+  customerPhone: text("customer_phone").notNull().default(""),
   status: text("status").notNull().default("processing"), // processing, shipped, delivered, cancelled
   totalAmount: numeric("total_amount", { precision: 10, scale: 2 }).notNull(),
   shippingAmount: numeric("shipping_amount", { precision: 10, scale: 2 }).notNull().default('0'),
@@ -213,6 +215,8 @@ export type UpsertUser = typeof users.$inferInsert;
 
 // Request Types
 export type CreateOrderRequest = {
+  customerName: string;
+  customerPhone: string;
   shippingAddress: string;
   paymentMethod: "cod" | "card";
   notes?: string;

@@ -22,6 +22,8 @@ import {
 } from "@/components/ui/select";
 
 const checkoutSchema = z.object({
+  customerName: z.string().min(2, "يرجى إدخال الاسم الكامل"),
+  customerPhone: z.string().min(10, "رقم الهاتف يجب أن يتكون من 10 أرقام على الأقل"),
   shippingAddress: z.string().min(10, "العنوان يجب أن يكون واضحاً ومفصلاً"),
   paymentMethod: z.enum(["cod", "card"]),
   notes: z.string().optional(),
@@ -43,6 +45,8 @@ export default function CheckoutPage() {
   const form = useForm<CheckoutFormValues>({
     resolver: zodResolver(checkoutSchema),
     defaultValues: {
+      customerName: "",
+      customerPhone: "",
       paymentMethod: "cod",
       shippingAddress: "",
       notes: "",
@@ -97,6 +101,36 @@ export default function CheckoutPage() {
             
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="customerName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>الاسم الكامل</FormLabel>
+                        <FormControl>
+                          <Input placeholder="أدخل اسمك بالكامل" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="customerPhone"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>رقم الهاتف</FormLabel>
+                        <FormControl>
+                          <Input placeholder="07XXXXXXXX" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
                 <FormField
                   control={form.control}
                   name="regionId"
