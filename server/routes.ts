@@ -33,7 +33,7 @@ const storage_multer = multer.diskStorage({
 const upload = multer({ storage: storage_multer });
 
 import { db } from "./db";
-import { users } from "@shared/schema";
+import { users, insertBranchSchema } from "@shared/schema";
 import { eq } from "drizzle-orm";
 
 export async function registerRoutes(
