@@ -421,10 +421,13 @@ export async function registerRoutes(
 
   app.post("/api/social-links", isAuthenticated, isAdminMiddleware, async (req, res) => {
     try {
+      console.log("Social link POST body:", JSON.stringify(req.body, null, 2));
       const link = await storage.createSocialLink(req.body);
+      console.log("Social link created:", JSON.stringify(link, null, 2));
       res.status(201).json(link);
-    } catch (err) {
-      res.status(500).json({ message: "Internal server error" });
+    } catch (err: any) {
+      console.error("Social link creation error:", err);
+      res.status(500).json({ message: err.message || "Internal server error" });
     }
   });
 

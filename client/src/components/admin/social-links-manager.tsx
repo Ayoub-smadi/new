@@ -28,6 +28,7 @@ export default function SocialLinksManager() {
 
   const createMutation = useMutation({
     mutationFn: async (values: any) => {
+      console.log("Sending values:", values);
       const res = await apiRequest("POST", "/api/social-links", values);
       return res.json();
     },
@@ -36,6 +37,14 @@ export default function SocialLinksManager() {
       toast({ title: "تمت الإضافة بنجاح" });
       form.reset();
     },
+    onError: (error: any) => {
+      console.error("Mutation error:", error);
+      toast({ 
+        title: "فشل الإضافة", 
+        description: error.message || "حدث خطأ غير متوقع",
+        variant: "destructive" 
+      });
+    }
   });
 
   const deleteMutation = useMutation({
@@ -68,7 +77,13 @@ export default function SocialLinksManager() {
         </CardHeader>
         <CardContent>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit((data) => createMutation.mutate(data))} className="flex gap-4 items-end">
+            <form 
+              onSubmit={form.handleSubmit(
+                (data) => createMutation.mutate(data),
+                (errors) => console.log("Form errors:", errors)
+              )} 
+              className="flex gap-4 items-end"
+            >
               <FormField
                 control={form.control}
                 name="platform"

@@ -416,6 +416,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createSocialLink(link: InsertSocialLink) {
+    console.log("Storage: Creating social link with:", JSON.stringify(link, null, 2));
     const [res] = await db.insert(socialLinks).values(link).returning();
     return res;
   }
