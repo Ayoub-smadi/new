@@ -9,6 +9,7 @@ const resources = {
         "home": "Home",
         "shop": "Shop",
         "nursery": "Nursery",
+        "branches": "Branches",
         "about": "About Us",
         "contact": "Contact Us"
       },
@@ -75,6 +76,7 @@ const resources = {
         "home": "الرئيسية",
         "shop": "المتجر",
         "nursery": "المشتل",
+        "branches": "الفروع",
         "about": "من نحن",
         "contact": "اتصل بنا"
       },

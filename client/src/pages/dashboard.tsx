@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Loader2, Package, Clock, CheckCircle, Plus, Edit, Trash2, LayoutDashboard, Settings, Truck, Globe } from "lucide-react";
+import { Loader2, Package, Clock, CheckCircle, Plus, Edit, Trash2, LayoutDashboard, Settings, Truck, Globe, MapPin } from "lucide-react";
 import { format } from "date-fns";
 import { ar } from "date-fns/locale";
 import { useQuery, useMutation } from "@tanstack/react-query";
