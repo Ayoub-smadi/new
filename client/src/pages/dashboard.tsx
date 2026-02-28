@@ -1097,28 +1097,17 @@ export default function DashboardPage() {
                             </FormItem>
                           )}
                         />
-                        <FormField
-                          control={nurseryForm.control}
-                          name="category"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>التصنيف</FormLabel>
-                              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                <FormControl>
-                                  <SelectTrigger className="text-right"><SelectValue placeholder="اختر التصنيف" /></SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  <SelectItem value="زينة">زينة</SelectItem>
-                                  <SelectItem value="اشجار">اشجار</SelectItem>
-                                  <SelectItem value="شجيرات">شجيرات</SelectItem>
-                                  <SelectItem value="نباتات">نباتات</SelectItem>
-                                  <SelectItem value="عام">عام</SelectItem>
-                                </SelectContent>
-                              </Select>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
+                          <FormField
+                            control={nurseryForm.control}
+                            name="category"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>التصنيف</FormLabel>
+                                <FormControl><Input {...field} className="text-right" placeholder="مثلاً: حمضيات، زينة" /></FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
                         <FormField
                           control={nurseryForm.control}
                           name="imageUrl"
