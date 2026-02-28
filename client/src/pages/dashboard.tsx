@@ -1113,7 +1113,6 @@ export default function DashboardPage() {
                                     <SelectItem value="اشجار">اشجار</SelectItem>
                                     <SelectItem value="شجيرات">شجيرات</SelectItem>
                                     <SelectItem value="نباتات">نباتات</SelectItem>
-                                    <SelectItem value="حمضيات">حمضيات</SelectItem>
                                     <SelectItem value="زينة">زينة</SelectItem>
                                   </SelectContent>
                                 </Select>
@@ -1138,8 +1137,38 @@ export default function DashboardPage() {
                           name="imageUrl"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>رابط الصورة</FormLabel>
-                              <FormControl><Input {...field} className="text-right" /></FormControl>
+                              <FormLabel>الصورة</FormLabel>
+                              <FormControl>
+                                <div className="space-y-2">
+                                  <Input 
+                                    type="file" 
+                                    accept="image/*" 
+                                    className="text-right"
+                                    onChange={async (e) => {
+                                      const file = e.target.files?.[0];
+                                      if (file) {
+                                        const formData = new FormData();
+                                        formData.append("file", file);
+                                        try {
+                                          const res = await fetch("/api/upload", {
+                                            method: "POST",
+                                            body: formData,
+                                          });
+                                          const data = await res.json();
+                                          field.onChange(data.url);
+                                          toast({ title: "تم رفع الصورة بنجاح" });
+                                        } catch (error) {
+                                          toast({ title: "فشل رفع الصورة", variant: "destructive" });
+                                        }
+                                      }
+                                    }}
+                                  />
+                                  {field.value && (
+                                    <img src={field.value} alt="Preview" className="w-20 h-20 object-cover rounded-lg border" />
+                                  )}
+                                  <Input type="hidden" {...field} />
+                                </div>
+                              </FormControl>
                               <FormMessage />
                             </FormItem>
                           )}

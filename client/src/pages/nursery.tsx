@@ -25,7 +25,7 @@ export default function NurseryPage() {
 
   const [selectedCategory, setSelectedCategory] = useState<string>("الكل");
 
-  const categories = ["الكل", "حمضيات", "زينة", "اشجار", "شجيرات", "نباتات"];
+  const categories = ["الكل", "زينة", "اشجار", "شجيرات", "نباتات"];
 
   const filteredItems = items?.filter(item => 
     selectedCategory === "الكل" || 
