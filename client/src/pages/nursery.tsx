@@ -22,9 +22,7 @@ export default function NurseryPage() {
     queryKey: ["/api/nursery"],
   });
 
-  const { data: categories } = useQuery<Category[]>({
-    queryKey: ["/api/categories"],
-  });
+  const plantCategories = Array.from(new Set(items?.map(item => item.category).filter(Boolean))) as string[];
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
@@ -69,23 +67,15 @@ export default function NurseryPage() {
 
       {/* Categories Section */}
       <section className="mb-16">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          {categories?.map((category, i) => (
-            <Link key={category.id} href={`/products?category=${category.id}`}>
-              <motion.div
-                whileHover={{ scale: 1.02 }}
-                className="group relative h-40 rounded-2xl overflow-hidden cursor-pointer bg-black/5"
-              >
-                <img 
-                  src={category.imageUrl || `https://images.unsplash.com/photo-1416879598555-22442b083d03`} 
-                  alt={category.name}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                />
-                <div className={`absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex items-end p-4 ${isRtl ? 'text-right' : 'text-left'}`}>
-                  <h3 className="text-white font-bold text-lg">{category.name}</h3>
-                </div>
-              </motion.div>
-            </Link>
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+          {plantCategories?.map((category, i) => (
+            <motion.div
+              key={category}
+              whileHover={{ scale: 1.05 }}
+              className="bg-primary/5 hover:bg-primary/10 border border-primary/10 rounded-xl p-4 cursor-pointer text-center transition-colors"
+            >
+              <h3 className="text-primary font-bold">{category}</h3>
+            </motion.div>
           ))}
         </div>
       </section>
