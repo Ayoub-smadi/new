@@ -144,14 +144,33 @@ export default function DashboardPage() {
     },
   });
 
-  const deleteProductMutation = useMutation({
-    mutationFn: async (id: string) => {
-      await apiRequest("DELETE", `/api/products/${id}`);
+  const [isNurseryDialogOpen, setIsNurseryDialogOpen] = useState(false);
+  const nurseryForm = useForm({
+    resolver: zodResolver(insertNurseryGallerySchema),
+    defaultValues: {
+      title: "",
+      description: "",
+      imageUrl: "",
+      additionalImages: [],
+      type: "نباتات",
+      category: "عام",
+    },
+  });
+
+  const nurseryMutation = useMutation({
+    mutationFn: async (data: any) => {
+      return await apiRequest("POST", "/api/nursery", data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/products"] });
-      toast({ title: "تم حذف المنتج بنجاح" });
+      queryClient.invalidateQueries({ queryKey: ["/api/nursery"] });
+      setIsNurseryDialogOpen(false);
+      nurseryForm.reset();
+      toast({ title: "تم إضافة النبتة للمشتل بنجاح" });
     },
+  });
+
+  const { data: nurseryItems } = useQuery<NurseryGallery[]>({
+    queryKey: ["/api/nursery"],
   });
 
   const [selectedCategoryIdForSub] = useState<string>("");
@@ -332,6 +351,13 @@ export default function DashboardPage() {
                 onClick={() => setActiveTab("orders")}
               >
                 <Truck className="h-4 w-4 ml-2" /> جميع الطلبات
+              </Button>
+              <Button 
+                variant={activeTab === "nursery" ? "default" : "ghost"} 
+                className="w-full justify-start gap-2 text-right"
+                onClick={() => setActiveTab("nursery")}
+              >
+                <Globe className="h-4 w-4 ml-2" /> إدارة المشتل
               </Button>
             </nav>
           </div>
@@ -1045,8 +1071,128 @@ export default function DashboardPage() {
               </section>
             )}
           </div>
-        </div>
-      </div>
-    </div>
-  );
-}
+          {activeTab === "nursery" && isAdmin && (
+            <div className="space-y-6">
+              <div className="flex justify-between items-center">
+                <h2 className="text-2xl font-bold">إدارة المشتل</h2>
+                <Dialog open={isNurseryDialogOpen} onOpenChange={setIsNurseryDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button className="gap-2">
+                      <Plus className="h-4 w-4" /> إضافة نبتة للمشتل
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="text-right max-w-2xl">
+                    <DialogHeader>
+                      <DialogTitle className="text-right">إضافة نبتة جديدة</DialogTitle>
+                    </DialogHeader>
+                    <Form {...nurseryForm}>
+                      <form onSubmit={nurseryForm.handleSubmit((data) => nurseryMutation.mutate(data))} className="space-y-4">
+                        <FormField
+                          control={nurseryForm.control}
+                          name="title"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>الاسم</FormLabel>
+                              <FormControl><Input {...field} className="text-right" /></FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <div className="grid grid-cols-2 gap-4">
+                          <FormField
+                            control={nurseryForm.control}
+                            name="type"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>النوع</FormLabel>
+                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                  <FormControl>
+                                    <SelectTrigger className="text-right"><SelectValue placeholder="اختر النوع" /></SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent>
+                                    <SelectItem value="اشجار">اشجار</SelectItem>
+                                    <SelectItem value="شجيرات">شجيرات</SelectItem>
+                                    <SelectItem value="نباتات">نباتات</SelectItem>
+                                    <SelectItem value="حمضيات">حمضيات</SelectItem>
+                                    <SelectItem value="زينة">زينة</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={nurseryForm.control}
+                            name="category"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>التصنيف (اختياري)</FormLabel>
+                                <FormControl><Input {...field} className="text-right" placeholder="مثلاً: حمضيات، زينة" /></FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                        <FormField
+                          control={nurseryForm.control}
+                          name="imageUrl"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>رابط الصورة</FormLabel>
+                              <FormControl><Input {...field} className="text-right" /></FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={nurseryForm.control}
+                          name="description"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>الوصف</FormLabel>
+                              <FormControl><Textarea {...field} className="text-right" rows={4} /></FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <Button type="submit" className="w-full" disabled={nurseryMutation.isPending}>
+                          {nurseryMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                          حفظ النبتة
+                        </Button>
+                      </form>
+                    </Form>
+                  </DialogContent>
+                </Dialog>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {nurseryItems?.map((item) => (
+                  <Card key={item.id} className="overflow-hidden">
+                    <img src={item.imageUrl} alt={item.title} className="w-full h-48 object-cover" />
+                    <CardContent className="p-4">
+                      <div className="flex justify-between items-start mb-2">
+                        <Badge>{item.type}</Badge>
+                        <h3 className="font-bold">{item.title}</h3>
+                      </div>
+                      <p className="text-sm text-muted-foreground line-clamp-2 mb-4">{item.description}</p>
+                      <Button 
+                        variant="destructive" 
+                        size="sm" 
+                        className="w-full gap-2"
+                        onClick={() => {
+                          if (confirm("هل أنت متأكد من حذف هذه النبتة؟")) {
+                            apiRequest("DELETE", `/api/nursery/${item.id}`).then(() => {
+                              queryClient.invalidateQueries({ queryKey: ["/api/nursery"] });
+                              toast({ title: "تم الحذف بنجاح" });
+                            });
+                          }
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4" /> حذف
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          )}

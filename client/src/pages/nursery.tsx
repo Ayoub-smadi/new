@@ -25,10 +25,12 @@ export default function NurseryPage() {
 
   const [selectedCategory, setSelectedCategory] = useState<string>("الكل");
 
-  const categories = ["الكل", ...Array.from(new Set(items?.map(item => item.category || "عام") || []))];
+  const categories = ["الكل", "حمضيات", "زينة", "اشجار", "شجيرات", "نباتات"];
 
   const filteredItems = items?.filter(item => 
-    selectedCategory === "الكل" || (item.category || "عام") === selectedCategory
+    selectedCategory === "الكل" || 
+    (item.category === selectedCategory) || 
+    (item.type === selectedCategory)
   );
 
   const deleteMutation = useMutation({
