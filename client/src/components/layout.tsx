@@ -18,6 +18,20 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 
+import { useQuery } from "@tanstack/react-query";
+import { SocialLink } from "@shared/schema";
+import { Facebook, Instagram, Twitter, Youtube, Send, Globe } from "lucide-react";
+
+const ICON_MAP: Record<string, any> = {
+  facebook: Facebook,
+  instagram: Instagram,
+  twitter: Twitter,
+  youtube: Youtube,
+  whatsapp: Send,
+  tiktok: Globe,
+  default: Globe
+};
+
 export function Layout({ children }: { children: React.ReactNode }) {
   const { user, logout, isAdmin } = useAuth();
   const { theme, setTheme } = useTheme();
@@ -25,6 +39,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
   const [isOpen, setIsOpen] = useState(false);
   const { t, i18n } = useTranslation();
+
+  const { data: socialLinks } = useQuery<SocialLink[]>({
+    queryKey: ["/api/social-links"],
+  });
 
   const isRtl = i18n.language === 'ar';
 
@@ -225,13 +243,29 @@ export function Layout({ children }: { children: React.ReactNode }) {
             </div>
             <div>
               <h3 className="font-semibold mb-4">{t('footer.subscribe')}</h3>
-              <div className="flex gap-2">
+              <div className="flex gap-2 mb-4">
                 <input 
                   type="email" 
                   placeholder={t('footer.email_placeholder')} 
                   className="flex-1 px-3 py-2 rounded-md border border-input bg-background text-sm"
                 />
                 <Button size="sm">{t('footer.subscribe_btn')}</Button>
+              </div>
+              <div className="flex gap-4">
+                {socialLinks?.filter(link => link.isEnabled).map((link) => {
+                  const Icon = ICON_MAP[link.platform.toLowerCase()] || ICON_MAP.default;
+                  return (
+                    <a
+                      key={link.id}
+                      href={link.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-muted-foreground hover:text-primary transition-colors"
+                    >
+                      <Icon className="h-5 w-5" />
+                    </a>
+                  );
+                })}
               </div>
             </div>
           </div>

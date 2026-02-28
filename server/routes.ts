@@ -413,6 +413,36 @@ export async function registerRoutes(
     }
   });
 
+  // SOCIAL LINKS
+  app.get("/api/social-links", async (req, res) => {
+    const links = await storage.getSocialLinks();
+    res.json(links);
+  });
+
+  app.post("/api/social-links", isAuthenticated, isAdminMiddleware, async (req, res) => {
+    try {
+      const link = await storage.createSocialLink(req.body);
+      res.status(201).json(link);
+    } catch (err) {
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.patch("/api/social-links/:id", isAuthenticated, isAdminMiddleware, async (req, res) => {
+    try {
+      const link = await storage.updateSocialLink(req.params.id, req.body);
+      if (!link) return res.status(404).json({ message: "Link not found" });
+      res.json(link);
+    } catch (err) {
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.delete("/api/social-links/:id", isAuthenticated, isAdminMiddleware, async (req, res) => {
+    await storage.deleteSocialLink(req.params.id);
+    res.status(204).end();
+  });
+
   // Call seed database
   try {
     await seedDatabase();

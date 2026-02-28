@@ -172,6 +172,15 @@ export const siteSettings = pgTable("site_settings", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+export const socialLinks = pgTable("social_links", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  platform: text("platform").notNull(), // facebook, instagram, whatsapp, tiktok, etc.
+  url: text("url").notNull(),
+  icon: text("icon").notNull(), // lucide icon name
+  isEnabled: boolean("is_enabled").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Base Schemas
 export const insertCategorySchema = createInsertSchema(categories).omit({ id: true, createdAt: true });
 export const insertSubCategorySchema = createInsertSchema(subCategories).omit({ id: true, createdAt: true });
@@ -187,6 +196,7 @@ export const insertNurseryGallerySchema = createInsertSchema(nurseryGallery, {
 export const insertBranchSchema = createInsertSchema(branches).omit({ id: true, createdAt: true });
 export const insertShippingRateSchema = createInsertSchema(shippingRates).omit({ id: true, createdAt: true });
 export const insertSiteSettingSchema = createInsertSchema(siteSettings).omit({ id: true, updatedAt: true });
+export const insertSocialLinkSchema = createInsertSchema(socialLinks).omit({ id: true, createdAt: true });
 
 // Types
 export type Category = typeof categories.$inferSelect;
@@ -209,6 +219,8 @@ export type ShippingRate = typeof shippingRates.$inferSelect;
 export type InsertShippingRate = z.infer<typeof insertShippingRateSchema>;
 export type SiteSetting = typeof siteSettings.$inferSelect;
 export type InsertSiteSetting = z.infer<typeof insertSiteSettingSchema>;
+export type SocialLink = typeof socialLinks.$inferSelect;
+export type InsertSocialLink = z.infer<typeof insertSocialLinkSchema>;
 
 export type User = typeof users.$inferSelect;
 export type UpsertUser = typeof users.$inferInsert;

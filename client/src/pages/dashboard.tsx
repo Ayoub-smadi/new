@@ -7,7 +7,12 @@ import { Loader2, Package, Clock, CheckCircle, Plus, Edit, Trash2, LayoutDashboa
 import { format } from "date-fns";
 import { ar } from "date-fns/locale";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Product, Category, SubCategory, ShippingRate, NurseryGallery, SiteSetting, insertProductSchema, insertCategorySchema, insertSubCategorySchema, insertShippingRateSchema, insertNurseryGallerySchema } from "@shared/schema";
+import SocialLinksManager from "@/components/admin/social-links-manager";
+import { Product, Category, SubCategory, ShippingRate, NurseryGallery, SiteSetting, SocialLink, insertProductSchema, insertCategorySchema, insertSubCategorySchema, insertShippingRateSchema, insertNurseryGallerySchema } from "@shared/schema";
+
+// Inside DashboardPage component, find the Tabs component (I'll need to read more of the file to find where to insert)
+// Wait, I haven't seen the Tabs part yet. Let me read the rest of the file first.
+
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { api } from "@shared/routes";
@@ -494,6 +499,21 @@ export default function DashboardPage() {
               {importing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
               استيراد من CSV
             </Button>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="gap-2">
+                  <Globe className="h-4 w-4" /> التواصل الاجتماعي
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-4xl">
+                <DialogHeader>
+                  <DialogTitle>إدارة روابط التواصل الاجتماعي</DialogTitle>
+                </DialogHeader>
+                <div className="max-h-[70vh] overflow-y-auto p-1">
+                  <SocialLinksManager />
+                </div>
+              </DialogContent>
+            </Dialog>
             <Dialog>
               <DialogTrigger asChild>
                 <Button variant="outline" className="gap-2">

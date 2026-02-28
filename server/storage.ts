@@ -11,6 +11,7 @@ import {
   nurseryGallery, type NurseryGallery, type InsertNurseryGallery,
   branches, type Branch, type InsertBranch,
   shippingRates, type ShippingRate, type InsertShippingRate,
+  socialLinks, type SocialLink, type InsertSocialLink,
   siteSettings, type SiteSetting
 } from "@shared/schema";
 
@@ -71,6 +72,12 @@ export interface IStorage {
   getSiteSettings(): Promise<SiteSetting[]>;
   getSiteSetting(key: string): Promise<SiteSetting | undefined>;
   updateSiteSetting(key: string, value: string): Promise<SiteSetting>;
+
+  // Social Links
+  getSocialLinks(): Promise<SocialLink[]>;
+  createSocialLink(link: InsertSocialLink): Promise<SocialLink>;
+  updateSocialLink(id: string, link: Partial<InsertSocialLink>): Promise<SocialLink | undefined>;
+  deleteSocialLink(id: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -403,6 +410,25 @@ export class DatabaseStorage implements IStorage {
       .returning();
     return setting;
   }
+
+  async getSocialLinks() {
+    return await db.select().from(socialLinks);
+  }
+
+  async createSocialLink(link: InsertSocialLink) {
+    const [res] = await db.insert(socialLinks).values(link).returning();
+    return res;
+  }
+
+  async updateSocialLink(id: string, updates: Partial<InsertSocialLink>) {
+    const [res] = await db.update(socialLinks).set(updates).where(eq(socialLinks.id, id)).returning();
+    return res;
+  }
+
+  async deleteSocialLink(id: string) {
+    await db.delete(socialLinks).where(eq(socialLinks.id, id));
+  }
+}
 }
 
 export const storage = new DatabaseStorage();
