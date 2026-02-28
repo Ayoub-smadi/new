@@ -10,8 +10,10 @@ import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { motion, AnimatePresence } from "framer-motion";
+import { useLocation } from "wouter";
 
 export default function NurseryPage() {
+  const [location, setLocation] = useLocation();
   const { isAdmin } = useAuth();
   const { toast } = useToast();
   const { i18n } = useTranslation();
@@ -115,7 +117,13 @@ export default function NurseryPage() {
           >
             <Card 
               className="group relative overflow-hidden cursor-pointer border-none shadow-lg hover:shadow-2xl transition-all duration-500 rounded-3xl aspect-[3/4]"
-              onClick={() => setSelectedItem(item)}
+              onClick={() => {
+                if (item.type === 'product' && (item as any).productId) {
+                  setLocation(`/products/${(item as any).productId}`);
+                } else {
+                  setSelectedItem(item);
+                }
+              }}
             >
               <CardContent className="p-0 h-full w-full relative">
                 <img 
@@ -209,9 +217,6 @@ export default function NurseryPage() {
 
                 <div className="space-y-8 flex-grow">
                   <div className="space-y-4">
-                    <span className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-bold uppercase tracking-wider">
-                      {selectedItem.type}
-                    </span>
                     <h2 className="text-4xl font-black text-foreground leading-tight">{selectedItem.title}</h2>
                     <div className="w-16 h-1 bg-primary/30 rounded-full" />
                   </div>

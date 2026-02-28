@@ -152,7 +152,6 @@ export default function DashboardPage() {
       description: "",
       imageUrl: "",
       additionalImages: [],
-      type: "نباتات",
       category: "عام",
     },
   });
@@ -1098,40 +1097,28 @@ export default function DashboardPage() {
                             </FormItem>
                           )}
                         />
-                        <div className="grid grid-cols-2 gap-4">
-                          <FormField
-                            control={nurseryForm.control}
-                            name="type"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>النوع</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                  <FormControl>
-                                    <SelectTrigger className="text-right"><SelectValue placeholder="اختر النوع" /></SelectTrigger>
-                                  </FormControl>
-                                  <SelectContent>
-                                    <SelectItem value="اشجار">اشجار</SelectItem>
-                                    <SelectItem value="شجيرات">شجيرات</SelectItem>
-                                    <SelectItem value="نباتات">نباتات</SelectItem>
-                                    <SelectItem value="زينة">زينة</SelectItem>
-                                  </SelectContent>
-                                </Select>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                          <FormField
-                            control={nurseryForm.control}
-                            name="category"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>التصنيف (اختياري)</FormLabel>
-                                <FormControl><Input {...field} className="text-right" placeholder="مثلاً: حمضيات، زينة" /></FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </div>
+                        <FormField
+                          control={nurseryForm.control}
+                          name="category"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>التصنيف</FormLabel>
+                              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl>
+                                  <SelectTrigger className="text-right"><SelectValue placeholder="اختر التصنيف" /></SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="زينة">زينة</SelectItem>
+                                  <SelectItem value="اشجار">اشجار</SelectItem>
+                                  <SelectItem value="شجيرات">شجيرات</SelectItem>
+                                  <SelectItem value="نباتات">نباتات</SelectItem>
+                                  <SelectItem value="عام">عام</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
                         <FormField
                           control={nurseryForm.control}
                           name="imageUrl"

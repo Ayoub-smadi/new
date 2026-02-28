@@ -192,7 +192,6 @@ export const insertOrderItemSchema = createInsertSchema(orderItems).omit({ id: t
 export const insertReviewSchema = createInsertSchema(reviews).omit({ id: true, createdAt: true });
 export const insertNurseryGallerySchema = createInsertSchema(nurseryGallery, {
   additionalImages: z.array(z.string()).optional(),
-  type: z.enum(["اشجار", "شجيرات", "نباتات", "زينة"]),
 }).omit({ id: true, createdAt: true });
 export const insertBranchSchema = createInsertSchema(branches).omit({ id: true, createdAt: true });
 export const insertShippingRateSchema = createInsertSchema(shippingRates).omit({ id: true, createdAt: true });
