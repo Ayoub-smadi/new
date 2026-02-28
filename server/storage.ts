@@ -430,6 +430,5 @@ export class DatabaseStorage implements IStorage {
     await db.delete(socialLinks).where(eq(socialLinks.id, id));
   }
 }
-}
 
 export const storage = new DatabaseStorage();
