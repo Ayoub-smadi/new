@@ -255,7 +255,7 @@ export default function DashboardPage() {
       description: "",
       imageUrl: "",
       additionalImages: [] as string[],
-      type: "plant",
+      type: "نباتات",
       category: "عام",
     },
   });
@@ -667,27 +667,43 @@ export default function DashboardPage() {
                         </FormItem>
                       )}
                     />
-                    <FormField
-                      control={nurseryForm.control}
-                      name="type"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>النوع</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <FormField
+                        control={nurseryForm.control}
+                        name="type"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>النوع</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="اختر النوع" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="اشجار">اشجار</SelectItem>
+                                <SelectItem value="شجيرات">شجيرات</SelectItem>
+                                <SelectItem value="نباتات">نباتات</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={nurseryForm.control}
+                        name="category"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>التصنيف</FormLabel>
                             <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="اختر النوع" />
-                              </SelectTrigger>
+                              <Input placeholder="مثال: أشجار زينة، ورود، إلخ" {...field} />
                             </FormControl>
-                            <SelectContent>
-                              <SelectItem value="plant">نبتة</SelectItem>
-                              <SelectItem value="branch">فرع</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
                     <FormField
                       control={nurseryForm.control}
                       name="imageUrl"
@@ -733,19 +749,6 @@ export default function DashboardPage() {
                                 }}
                               />
                             </div>
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={nurseryForm.control}
-                      name="category"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>التصنيف</FormLabel>
-                          <FormControl>
-                            <Input placeholder="مثال: أشجار زينة، ورود، إلخ" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>

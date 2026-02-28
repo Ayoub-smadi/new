@@ -208,7 +208,7 @@ export default function NurseryPage() {
                 <div className="space-y-8 flex-grow">
                   <div className="space-y-4">
                     <span className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-bold uppercase tracking-wider">
-                      {selectedItem.type === 'plant' ? (isRtl ? "نبات" : "Plant") : (isRtl ? "فرع" : "Branch")}
+                      {selectedItem.type}
                     </span>
                     <h2 className="text-4xl font-black text-foreground leading-tight">{selectedItem.title}</h2>
                     <div className="w-16 h-1 bg-primary/30 rounded-full" />
