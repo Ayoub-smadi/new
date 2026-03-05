@@ -46,10 +46,10 @@ export default function Home() {
             className="max-w-3xl mx-auto space-y-6"
           >
             <Badge variant="outline" className="bg-white/10 backdrop-blur border-white/20 text-white px-4 py-1 text-sm">
-              {t('hero.badge')}
+              {getSetting("hero_badge", t('hero.badge'))}
             </Badge>
             <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight drop-shadow-lg">
-              {getSetting("home_hero_title", t('hero.title'))} <span className="text-accent">{t('hero.brand')}</span>
+              {getSetting("home_hero_title", t('hero.title'))} <span className="text-accent">{getSetting("brand_name", t('hero.brand'))}</span>
             </h1>
             <p className="text-lg md:text-xl text-white/90 leading-relaxed drop-shadow-md max-w-2xl mx-auto">
               {getSetting("home_hero_subtitle", t('hero.subtitle'))}

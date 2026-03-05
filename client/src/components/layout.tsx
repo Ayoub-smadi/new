@@ -44,6 +44,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
     queryKey: ["/api/social-links"],
   });
 
+  const { data: settings } = useQuery<any[]>({
+    queryKey: ["/api/site-settings"],
+  });
+
+  const getSetting = (key: string, defaultValue: string) => {
+    return settings?.find(s => s.key === key)?.value || defaultValue;
+  };
+
   const isRtl = i18n.language === 'ar';
 
   useEffect(() => {
@@ -80,7 +88,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 <div className="flex flex-col gap-6 mt-6">
                   <div className="flex items-center gap-2 font-bold text-xl text-primary">
                     <Leaf className="h-6 w-6" />
-                    <span>{t('hero.brand')}</span>
+                    <span>{getSetting("brand_name", t('hero.brand'))}</span>
                   </div>
                   <nav className="flex flex-col gap-4">
                     {navLinks.map((link) => (
@@ -103,7 +111,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
             <Link href="/">
               <div className={`flex items-center gap-2 font-bold text-2xl text-primary cursor-pointer ${isRtl ? 'mr-4' : 'ml-4'}`}>
                 <Leaf className="h-8 w-8" />
-                <span className="hidden sm:inline-block">{t('hero.brand')}</span>
+                <span className="hidden sm:inline-block">{getSetting("brand_name", t('hero.brand'))}</span>
               </div>
             </Link>
 
@@ -219,10 +227,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
             <div className="space-y-4">
               <div className="flex items-center gap-2 font-bold text-xl text-primary">
                 <Leaf className="h-6 w-6" />
-                <span>{t('hero.brand')}</span>
+                <span>{getSetting("brand_name", t('hero.brand'))}</span>
               </div>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                {t('footer.desc')}
+                {getSetting("footer_description", t('footer.desc'))}
               </p>
             </div>
             <div>
@@ -237,9 +245,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
             <div>
               <h3 className="font-semibold mb-4">{t('footer.contact_us')}</h3>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li>{isRtl ? 'الرياض، المملكة العربية السعودية' : 'Riyadh, Saudi Arabia'}</li>
-                <li>info@murooj.com</li>
-                <li dir="ltr">+966 11 123 4567</li>
+                <li>{getSetting("contact_address", isRtl ? 'الرياض، المملكة العربية السعودية' : 'Riyadh, Saudi Arabia')}</li>
+                <li>{getSetting("contact_email", "info@murooj.com")}</li>
+                <li dir="ltr">{getSetting("contact_phone", "+966 11 123 4567")}</li>
               </ul>
             </div>
             <div>
@@ -271,7 +279,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
             </div>
           </div>
           <div className="mt-12 pt-8 border-t text-center text-sm text-muted-foreground">
-            © {new Date().getFullYear()} {t('hero.brand')}. {t('footer.rights')}
+            © {new Date().getFullYear()} {getSetting("brand_name", t('hero.brand'))}. {t('footer.rights')}
           </div>
         </div>
       </footer>
