@@ -496,6 +496,7 @@ export async function seedSiteSettings() {
     { key: "hero_badge", value: "موسم الزراعة الجديد", description: "النص الصغير فوق العنوان الرئيسي" },
     { key: "brand_name", value: "مشاتل القادري", description: "اسم العلامة التجارية (مشاتل القادري)" },
     { key: "about_content", value: "مروج لاند هي شركتكم الرائدة في تقديم الحلول الزراعية المتكاملة...", description: "محتوى صفحة من نحن" },
+    { key: "about_image", value: "https://images.unsplash.com/photo-1523348837708-15d4a09cfac2", description: "صورة صفحة من نحن" },
     { key: "contact_email", value: "info@murooj.com", description: "بريد التواصل" },
     { key: "contact_phone", value: "+962 000 000 000", description: "رقم الهاتف" },
     { key: "footer_description", value: "وجهتك الأولى للمنتجات الزراعية عالية الجودة من مشاتل القادري. نوفر البذور، الأسمدة، والمعدات لمساعدة مزرعتك على الازدهار.", description: "وصف التذييل" },

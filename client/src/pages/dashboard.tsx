@@ -483,6 +483,26 @@ export default function DashboardPage() {
                                 }}
                                 className="flex-1 text-right"
                               />
+                            ) : setting.key.includes("image") ? (
+                              <div className="flex-1 space-y-2">
+                                <Input 
+                                  defaultValue={setting.value}
+                                  onBlur={(e) => {
+                                    if (e.target.value !== setting.value) {
+                                      updateSiteSettingMutation.mutate({ key: setting.key, value: e.target.value });
+                                    }
+                                  }}
+                                  className="text-right"
+                                  placeholder="رابط الصورة (URL)"
+                                />
+                                {setting.value && (
+                                  <img 
+                                    src={setting.value} 
+                                    alt="Preview" 
+                                    className="h-20 w-20 object-cover rounded border"
+                                  />
+                                )}
+                              </div>
                             ) : (
                               <Input 
                                 defaultValue={setting.value}
