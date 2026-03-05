@@ -30,11 +30,22 @@ const AboutPage = () => {
   const content = settings?.find(s => s.key === "about_content")?.value || "مشاتل القادري هي شركة رائدة في مجال المستلزمات الزراعية، نسعى لتمكين المزارعين من خلال توفير أفضل المنتجات والحلول الزراعية المبتكرة.";
   
   return (
-    <div className="container py-16 text-center">
-      <h1 className="text-3xl font-bold mb-4">من نحن</h1>
-      <p className="max-w-2xl mx-auto text-muted-foreground whitespace-pre-wrap">
-        {content}
-      </p>
+    <div className="container py-16">
+      <div className="grid md:grid-cols-2 gap-12 items-center">
+        <div className="order-2 md:order-1">
+          <h1 className="text-4xl font-bold mb-6 text-primary">من نحن</h1>
+          <p className="text-lg leading-relaxed text-muted-foreground whitespace-pre-wrap">
+            {content}
+          </p>
+        </div>
+        <div className="order-1 md:order-2 relative aspect-square md:aspect-video rounded-2xl overflow-hidden shadow-xl border-4 border-white dark:border-zinc-800">
+          <img 
+            src="https://images.unsplash.com/photo-1466692476868-aef1dfb1e735?auto=format&fit=crop&q=80" 
+            alt="من نحن - مشاتل القادري"
+            className="object-cover w-full h-full hover:scale-105 transition-transform duration-700"
+          />
+        </div>
+      </div>
     </div>
   );
 };
